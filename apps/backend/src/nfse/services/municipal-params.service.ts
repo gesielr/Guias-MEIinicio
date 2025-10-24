@@ -8,8 +8,9 @@ export class MunicipalParamsService {
       return cached.payload;
     }
 
-    const adn = await createAdnClient({ module: "parametros" });
-    const { data } = await adn.get("/parametros/municipios", {
+    const { http, endpoint } = await createAdnClient({ module: "parametros" });
+    const url = `${endpoint}/municipios`;
+    const { data } = await http.get(url, {
       params: { municipio: municipioIbge, itemListaServico: lc116Item }
     });
 

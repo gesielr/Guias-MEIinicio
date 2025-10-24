@@ -9,7 +9,7 @@ function decodeDpsPayload(base64Gzip: string): string {
     const xmlBuffer = gunzipSync(gzBuffer);
     return xmlBuffer.toString("utf8");
   } catch {
-    throw new Error("Payload DPS inválido: não foi possível decodificar GZip/Base64");
+    throw new Error("Payload DPS invalido: nao foi possivel decodificar GZip/Base64");
   }
 }
 
@@ -22,21 +22,21 @@ export interface EmitNfseDto {
 export class NfseService {
   async emit(dto: EmitNfseDto) {
     if (!dto?.versao) {
-      throw new Error("Campo versao é obrigatório");
+      throw new Error("Campo versao e obrigatorio");
     }
 
     if (!dto?.userId) {
-      throw new Error("Campo userId é obrigatório");
+      throw new Error("Campo userId e obrigatorio");
     }
 
     if (!dto?.dps_xml_gzip_b64) {
-      throw new Error("Campo dps_xml_gzip_b64 é obrigatório");
+      throw new Error("Campo dps_xml_gzip_b64 e obrigatorio");
     }
 
     const signedXml = decodeDpsPayload(dto.dps_xml_gzip_b64);
     const xmlHash = hashXml(signedXml);
 
-    const adn = await createAdnClient({ module: "contribuintes" });
+    const { http, endpoint } = await createAdnClient({ module: "contribuintes" });
     const payload = {
       versao: dto.versao,
       dps_xml_gzip_b64: dto.dps_xml_gzip_b64
@@ -44,7 +44,7 @@ export class NfseService {
 
     let response;
     try {
-      response = await adn.post("/nfse", payload, {
+      response = await http.post(endpoint, payload, {
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json"
@@ -92,8 +92,9 @@ export class NfseService {
   }
 
   async pollStatus(protocolo: string) {
-    const adn = await createAdnClient({ module: "contribuintes" });
-    const { data } = await adn.get(`/nfse/${protocolo}`, {
+    const { http, endpoint } = await createAdnClient({ module: "contribuintes" });
+    const url = `${endpoint}/${encodeURIComponent(protocolo)}`;
+    const { data } = await http.get(url, {
       headers: {
         Accept: "application/json"
       }
@@ -106,9 +107,10 @@ export class NfseService {
   }
 
   async downloadDanfe(chave: string) {
-    const adn = await createAdnClient({ module: "danfse" });
-    const { data } = await adn.get(`/danfse/${chave}`, {
-      responseType: "arraybuffer" as any
+    const { http, endpoint } = await createAdnClient({ module: "danfse" });
+    const url = `${endpoint}/${encodeURIComponent(chave)}`;
+    const { data } = await http.get<ArrayBuffer>(url, {
+      responseType: "arraybuffer"
     });
     return Buffer.from(data);
   }

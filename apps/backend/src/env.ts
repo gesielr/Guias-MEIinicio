@@ -18,9 +18,7 @@ const envSchema = z.object({
   STRIPE_WEBHOOK_SECRET: z.string().optional()
   ,
   NFSE_ENV: z.enum(["pr", "prod"]).default("pr"),
-  NFSE_CONTRIBUINTES_BASE_URL: z.string().url().optional(),
-  NFSE_PARAMETROS_BASE_URL: z.string().url().optional(),
-  NFSE_DANFSE_BASE_URL: z.string().url().optional(),
+  NFSE_BASE_URL: z.string().url(),
   NFSE_CERT_PFX_PATH: z.string().optional(),
   NFSE_CERT_PFX_BASE64: z.string().optional(),
   NFSE_CERT_PFX_PASS: z.string().optional(),

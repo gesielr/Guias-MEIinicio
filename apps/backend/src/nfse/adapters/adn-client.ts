@@ -18,17 +18,20 @@ async function loadPfxBuffer(): Promise<Buffer | undefined> {
 }
 
 function resolveBaseUrl(module: CreateAdnClientOptions["module"]): string {
-  switch (module) {
-    case "contribuintes":
-      return env.NFSE_CONTRIBUINTES_BASE_URL || "";
-    case "parametros":
-      return env.NFSE_PARAMETROS_BASE_URL || "";
-    case "danfse":
-      return env.NFSE_DANFSE_BASE_URL || "";
-  }
+  const sanitizedBase = env.NFSE_BASE_URL.trim().replace(/\r/g, "").replace(/^['"]|['"]$/g, "");
+  const modulePath =
+    module === "contribuintes"
+      ? "nfse"
+      : module === "parametros"
+        ? "parametros"
+        : "danfse";
+  const baseWithSlash = sanitizedBase.endsWith("/") ? sanitizedBase : `${sanitizedBase}/`;
+  return new URL(modulePath, baseWithSlash).toString().replace(/\/$/, "");
 }
 
-export async function createAdnClient(options: CreateAdnClientOptions): Promise<AxiosInstance> {
+export async function createAdnClient(
+  options: CreateAdnClientOptions
+): Promise<{ http: AxiosInstance; endpoint: string }> {
   const pfx = await loadPfxBuffer();
 
   if (!pfx && !env.NFSE_CERT_PKCS11_LIBRARY) {
@@ -41,13 +44,16 @@ export async function createAdnClient(options: CreateAdnClientOptions): Promise<
     rejectUnauthorized: true
   });
 
-  return axios.create({
-    baseURL: resolveBaseUrl(options.module),
+  const endpoint = resolveBaseUrl(options.module);
+  console.info(`[SEFIN] endpoint (${options.module}) = ${endpoint}`);
+
+  const http = axios.create({
     httpsAgent,
     headers: {
-      "Content-Type": "application/xml",
       Accept: "application/json"
     },
-    timeout: 15000
+    timeout: 60000
   });
+
+  return { http, endpoint };
 }
