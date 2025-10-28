@@ -1,8 +1,4 @@
-// scripts/generate-dps.js
-const fs = require('fs');
-const path = require('path');
-
-const xml = `<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <DPS xmlns="http://www.sped.fazenda.gov.br/nfse" versao="1.00">
   <infDPS Id="DPS599106720001870000000000000000000000000001">
     <tpAmb>2</tpAmb>
@@ -30,7 +26,7 @@ const xml = `<?xml version="1.0" encoding="UTF-8"?>
       <email>prestador@example.com</email>
       <regTrib>
         <opSimpNac>2</opSimpNac>
-        <regApTribSN>6</regApTribSN>
+        <regEspTrib>0</regEspTrib>
       </regTrib>
     </prest>
     <toma>
@@ -61,13 +57,12 @@ const xml = `<?xml version="1.0" encoding="UTF-8"?>
     <valores>
       <vServPrest>
         <vServ>1500.00</vServ>
-        <vISSQN>30.00</vISSQN>
       </vServPrest>
       <trib>
         <tribMun>
           <tribISSQN>1</tribISSQN>
-          <tpRetISSQN>1</tpRetISSQN>
           <pAliq>2.00</pAliq>
+          <tpRetISSQN>1</tpRetISSQN>
         </tribMun>
         <totTrib>
           <indTotTrib>0</indTotTrib>
@@ -75,7 +70,5 @@ const xml = `<?xml version="1.0" encoding="UTF-8"?>
       </trib>
     </valores>
   </infDPS>
-</DPS>`;
+</DPS>
 
-fs.writeFileSync(path.resolve(process.cwd(), 'DPS.xml'), xml, 'utf8');
-console.log('DPS.xml gerado');

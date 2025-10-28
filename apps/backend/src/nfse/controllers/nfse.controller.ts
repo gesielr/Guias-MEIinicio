@@ -130,6 +130,22 @@ export async function registerNfseController(app: FastifyInstance) {
     reply.header("Content-Disposition", `inline; filename=NFSe-${id}.pdf`);
     return reply.send(pdf);
   });
+
+  /**
+   * Endpoint para obter métricas do sistema NFSe
+   */
+  app.get("/nfse/metrics", async (request, reply) => {
+    try {
+      const metrics = service.getMetrics();
+      return reply.send(metrics);
+    } catch (error) {
+      request.log.error({ err: error, scope: "nfse:metrics" });
+      return reply.code(500).send({
+        error: "Internal Server Error",
+        message: "Erro ao obter métricas do sistema NFSe"
+      });
+    }
+  });
 }
 
 

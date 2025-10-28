@@ -5,6 +5,7 @@ import { env } from "../../env";
 
 interface CreateAdnClientOptions {
   module: "contribuintes" | "parametros" | "danfse";
+  tpAmb: '1' | '2'; // 1-Produção, 2-Homologação
 }
 
 async function loadPfxBuffer(): Promise<Buffer | undefined> {
@@ -17,15 +18,34 @@ async function loadPfxBuffer(): Promise<Buffer | undefined> {
   return undefined;
 }
 
-function resolveBaseUrl(module: CreateAdnClientOptions["module"]): string {
-  const sanitizedBase = env.NFSE_BASE_URL.trim().replace(/\r/g, "").replace(/^['"]|['"]$/g, "");
-  const modulePath =
-    module === "contribuintes"
-      ? "nfse"
-      : module === "parametros"
-        ? "parametros"
-        : "danfse";
+function sanitizeUrl(input: string): string {
+  return input.trim().replace(/\r/g, "").replace(/^['"]|['"]$/g, "");
+}
+
+function resolveBaseUrl(
+  module: CreateAdnClientOptions["module"],
+  tpAmb: CreateAdnClientOptions["tpAmb"]
+): string {
+  const moduleOverrides: Record<CreateAdnClientOptions["module"], string | undefined> = {
+    contribuintes: tpAmb === '1' ? env.NFSE_PRODUCAO_BASE_URL : env.NFSE_HOMOLOGACAO_BASE_URL,
+    parametros: undefined, // Não há override para parametros ainda
+    danfse: undefined, // Não há override para danfse ainda
+  };
+
+  const override = moduleOverrides[module];
+  if (override) {
+    return sanitizeUrl(override).replace(/\/$/, "");
+  }
+
+  const baseUrl = tpAmb === '1'
+    ? env.NFSE_PRODUCAO_BASE_URL || 'https://sefin.nfse.gov.br/sefinnacional'
+    : env.NFSE_HOMOLOGACAO_BASE_URL || 'https://sefin.hom.nfse.gov.br/sefinnacional';
+
+
+  const sanitizedBase = sanitizeUrl(baseUrl);
   const baseWithSlash = sanitizedBase.endsWith("/") ? sanitizedBase : `${sanitizedBase}/`;
+  const modulePath = module === "contribuintes" ? "contribuintes" : module;
+
   return new URL(modulePath, baseWithSlash).toString().replace(/\/$/, "");
 }
 
@@ -44,7 +64,7 @@ export async function createAdnClient(
     rejectUnauthorized: true
   });
 
-  const endpoint = resolveBaseUrl(options.module);
+  const endpoint = resolveBaseUrl(options.module, options.tpAmb);
   console.info(`[SEFIN] endpoint (${options.module}) = ${endpoint}`);
 
   const http = axios.create({

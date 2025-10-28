@@ -15,10 +15,25 @@ const envSchema = z.object({
     .string()
     .default("Olá! Sou a IA do GuiasMEI. Estou aqui para te ajudar com suas guias e notas fiscais."),
   STRIPE_PRICE_ID: z.string().optional(),
-  STRIPE_WEBHOOK_SECRET: z.string().optional()
-  ,
-  NFSE_ENV: z.enum(["pr", "prod"]).default("pr"),
-  NFSE_BASE_URL: z.string().url(),
+  STRIPE_WEBHOOK_SECRET: z.string().optional(),
+  
+  // Ambiente da API NFS-e (production | homologation)
+  NFSE_ENVIRONMENT: z.enum(['production', 'homologation']).default('production'),
+  
+  // URLs baseadas no ambiente
+  NFSE_BASE_URL: z.string().url().transform((val, ctx) => {
+    const env = ctx.parent?.NFSE_ENVIRONMENT || 'production';
+    if (env === 'homologation') {
+      return 'https://homologacao.adn.nfse.gov.br';
+    }
+    return val;
+  }),
+  
+  // URLs específicas para diferentes módulos
+  NFSE_CONTRIBUINTES_BASE_URL: z.string().url().optional(),
+  NFSE_PARAMETROS_BASE_URL: z.string().url().optional(),
+  NFSE_DANFSE_BASE_URL: z.string().url().optional(),
+  
   NFSE_CERT_PFX_PATH: z.string().optional(),
   NFSE_CERT_PFX_BASE64: z.string().optional(),
   NFSE_CERT_PFX_PASS: z.string().optional(),
