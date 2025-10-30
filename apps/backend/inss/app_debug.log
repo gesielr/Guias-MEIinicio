@@ -1,0 +1,188 @@
+2025-10-30 08:39:16,120 - app.main - INFO - [DEBUG] Adding DebugMiddleware...
+2025-10-30 08:39:16,162 - app.main - INFO - ================================================================================
+2025-10-30 08:39:16,175 - app.main - INFO - ================================================================================
+2025-10-30 08:39:16,189 - app.main - INFO - ================================================================================
+2025-10-30 08:39:16,194 - app.main - INFO - ================================================================================
+2025-10-30 08:39:55,831 - app.main - INFO - ================================================================================
+2025-10-30 08:39:55,841 - app.main - INFO - ================================================================================
+2025-10-30 08:40:17,851 - app.main - INFO - [DEBUG] Adding DebugMiddleware...
+2025-10-30 08:40:17,851 - app.main - INFO - [ROUTERS] Incluindo routers...
+2025-10-30 08:40:17,852 - app.main - INFO -    [OK] Incluindo router INSS...
+2025-10-30 08:40:17,854 - app.main - INFO -    [OK] Incluindo router Webhook...
+2025-10-30 08:40:17,854 - app.main - INFO -    [OK] Incluindo router Users...
+2025-10-30 08:40:17,857 - app.main - INFO - [OK] Todos os routers incluidos com sucesso
+2025-10-30 08:40:17,858 - app.main - INFO - ================================================================================
+2025-10-30 08:40:17,858 - app.main - INFO - [START] INICIANDO LIFESPAN CONTEXT MANAGER
+2025-10-30 08:40:17,858 - app.main - INFO - ================================================================================
+2025-10-30 08:40:17,858 - app.main - INFO - [CONFIG] Carregando configuracoes...
+2025-10-30 08:40:17,858 - app.main - INFO - [OK] App Name: INSS Guias API
+2025-10-30 08:40:17,859 - app.main - INFO - [OK] App Version: 1.0.0
+2025-10-30 08:40:17,859 - app.main - INFO - ================================================================================
+2025-10-30 08:40:17,859 - app.main - INFO - [OK] LIFESPAN STARTUP COMPLETO - SERVIDOR PRONTO
+2025-10-30 08:40:17,859 - app.main - INFO - ================================================================================
+2025-10-30 08:40:32,220 - app.main - INFO - ================================================================================
+2025-10-30 08:40:32,221 - app.main - INFO - [STOP] INICIANDO SHUTDOWN DO LIFESPAN
+2025-10-30 08:40:32,221 - app.main - INFO - ================================================================================
+2025-10-30 08:40:32,221 - app.main - INFO - [OK] SHUTDOWN COMPLETO
+2025-10-30 08:43:54,674 - app.main - INFO - [DEBUG] Adding DebugMiddleware...
+2025-10-30 08:43:54,675 - app.main - INFO - [ROUTERS] Incluindo routers...
+2025-10-30 08:43:54,675 - app.main - INFO -    [OK] Incluindo router INSS...
+2025-10-30 08:43:54,678 - app.main - INFO -    [OK] Incluindo router Webhook...
+2025-10-30 08:43:54,679 - app.main - INFO -    [OK] Incluindo router Users...
+2025-10-30 08:43:54,681 - app.main - INFO - [OK] Todos os routers incluidos com sucesso
+2025-10-30 08:43:54,682 - app.main - INFO - ================================================================================
+2025-10-30 08:43:54,682 - app.main - INFO - [START] INICIANDO LIFESPAN CONTEXT MANAGER
+2025-10-30 08:43:54,683 - app.main - INFO - ================================================================================
+2025-10-30 08:43:54,683 - app.main - INFO - [CONFIG] Carregando configuracoes...
+2025-10-30 08:43:54,683 - app.main - INFO - [OK] App Name: INSS Guias API
+2025-10-30 08:43:54,683 - app.main - INFO - [OK] App Version: 1.0.0
+2025-10-30 08:43:54,683 - app.main - INFO - ================================================================================
+2025-10-30 08:43:54,684 - app.main - INFO - [OK] LIFESPAN STARTUP COMPLETO - SERVIDOR PRONTO
+2025-10-30 08:43:54,684 - app.main - INFO - ================================================================================
+2025-10-30 08:44:04,207 - app.main - INFO - ================================================================================
+2025-10-30 08:44:04,207 - app.main - INFO - [REQUEST] GET /
+2025-10-30 08:44:04,207 - app.main - INFO -    Headers: {'user-agent': 'Mozilla/5.0 (Windows NT; Windows NT 10.0; pt-BR) WindowsPowerShell/5.1.26100.6899', 'host': '127.0.0.1:9000', 'connection': 'Keep-Alive'}
+2025-10-30 08:44:04,208 - app.main - INFO - ================================================================================
+2025-10-30 08:44:04,210 - app.main - INFO - [ROUTE] Rota raiz (/) chamada
+2025-10-30 08:44:04,210 - app.main - INFO - ================================================================================
+2025-10-30 08:44:04,211 - app.main - INFO - [RESPONSE] Status 200
+2025-10-30 08:44:04,211 - app.main - INFO -    Tempo: 0.002s
+2025-10-30 08:44:04,211 - app.main - INFO - ================================================================================
+2025-10-30 08:44:26,441 - app.main - INFO - ================================================================================
+2025-10-30 08:44:26,442 - app.main - INFO - [REQUEST] POST /api/v1/guias/emitir
+2025-10-30 08:44:26,442 - app.main - INFO -    Headers: {'user-agent': 'Mozilla/5.0 (Windows NT; Windows NT 10.0; pt-BR) WindowsPowerShell/5.1.26100.6899', 'content-type': 'application/json', 'host': '127.0.0.1:9000', 'content-length': '160'}
+2025-10-30 08:44:26,442 - app.main - INFO - ================================================================================
+2025-10-30 08:44:26,443 - app.main - INFO - ================================================================================
+2025-10-30 08:44:26,443 - app.main - INFO - [RESPONSE] Status 404
+2025-10-30 08:44:26,443 - app.main - INFO -    Tempo: 0.001s
+2025-10-30 08:44:26,443 - app.main - INFO - ================================================================================
+2025-10-30 08:44:35,616 - app.main - INFO - ================================================================================
+2025-10-30 08:44:35,616 - app.main - INFO - [REQUEST] POST /api/v1/guias/emitir
+2025-10-30 08:44:35,616 - app.main - INFO -    Headers: {'user-agent': 'Mozilla/5.0 (Windows NT; Windows NT 10.0; pt-BR) WindowsPowerShell/5.1.26100.6899', 'content-type': 'application/json', 'host': '127.0.0.1:9000', 'content-length': '121'}
+2025-10-30 08:44:35,616 - app.main - INFO - ================================================================================
+2025-10-30 08:44:35,617 - app.main - INFO - ================================================================================
+2025-10-30 08:44:35,617 - app.main - INFO - [RESPONSE] Status 404
+2025-10-30 08:44:35,617 - app.main - INFO -    Tempo: 0.000s
+2025-10-30 08:44:35,618 - app.main - INFO - ================================================================================
+2025-10-30 08:45:05,688 - app.main - INFO - ================================================================================
+2025-10-30 08:45:05,688 - app.main - INFO - [STOP] INICIANDO SHUTDOWN DO LIFESPAN
+2025-10-30 08:45:05,688 - app.main - INFO - ================================================================================
+2025-10-30 08:45:05,689 - app.main - INFO - [OK] SHUTDOWN COMPLETO
+2025-10-30 08:45:07,968 - app.main - INFO - [DEBUG] Adding DebugMiddleware...
+2025-10-30 08:45:07,969 - app.main - INFO - [ROUTERS] Incluindo routers...
+2025-10-30 08:45:07,969 - app.main - INFO -    [OK] Incluindo router INSS...
+2025-10-30 08:45:07,970 - app.main - INFO -    [OK] Incluindo router Webhook...
+2025-10-30 08:45:07,971 - app.main - INFO -    [OK] Incluindo router Users...
+2025-10-30 08:45:07,972 - app.main - INFO - [OK] Todos os routers incluidos com sucesso
+2025-10-30 08:45:07,973 - app.main - INFO - ================================================================================
+2025-10-30 08:45:07,973 - app.main - INFO - [START] INICIANDO LIFESPAN CONTEXT MANAGER
+2025-10-30 08:45:07,974 - app.main - INFO - ================================================================================
+2025-10-30 08:45:07,974 - app.main - INFO - [CONFIG] Carregando configuracoes...
+2025-10-30 08:45:07,975 - app.main - INFO - [OK] App Name: INSS Guias API
+2025-10-30 08:45:07,975 - app.main - INFO - [OK] App Version: 1.0.0
+2025-10-30 08:45:07,975 - app.main - INFO - ================================================================================
+2025-10-30 08:45:07,975 - app.main - INFO - [OK] LIFESPAN STARTUP COMPLETO - SERVIDOR PRONTO
+2025-10-30 08:45:07,975 - app.main - INFO - ================================================================================
+2025-10-30 08:45:07,976 - app.main - INFO - ================================================================================
+2025-10-30 08:45:07,976 - app.main - INFO - [STOP] INICIANDO SHUTDOWN DO LIFESPAN
+2025-10-30 08:45:07,976 - app.main - INFO - ================================================================================
+2025-10-30 08:45:07,976 - app.main - INFO - [OK] SHUTDOWN COMPLETO
+2025-10-30 08:45:10,186 - app.main - INFO - [DEBUG] Adding DebugMiddleware...
+2025-10-30 08:45:10,186 - app.main - INFO - [ROUTERS] Incluindo routers...
+2025-10-30 08:45:10,187 - app.main - INFO -    [OK] Incluindo router INSS...
+2025-10-30 08:45:10,190 - app.main - INFO -    [OK] Incluindo router Webhook...
+2025-10-30 08:45:10,191 - app.main - INFO -    [OK] Incluindo router Users...
+2025-10-30 08:45:10,194 - app.main - INFO - [OK] Todos os routers incluidos com sucesso
+2025-10-30 08:45:10,196 - app.main - INFO - ================================================================================
+2025-10-30 08:45:10,196 - app.main - INFO - [START] INICIANDO LIFESPAN CONTEXT MANAGER
+2025-10-30 08:45:10,196 - app.main - INFO - ================================================================================
+2025-10-30 08:45:10,197 - app.main - INFO - [CONFIG] Carregando configuracoes...
+2025-10-30 08:45:10,197 - app.main - INFO - [OK] App Name: INSS Guias API
+2025-10-30 08:45:10,197 - app.main - INFO - [OK] App Version: 1.0.0
+2025-10-30 08:45:10,197 - app.main - INFO - ================================================================================
+2025-10-30 08:45:10,198 - app.main - INFO - [OK] LIFESPAN STARTUP COMPLETO - SERVIDOR PRONTO
+2025-10-30 08:45:10,198 - app.main - INFO - ================================================================================
+2025-10-30 08:45:15,338 - app.main - INFO - [DEBUG] Adding DebugMiddleware...
+2025-10-30 08:45:15,339 - app.main - INFO - [ROUTERS] Incluindo routers...
+2025-10-30 08:45:15,339 - app.main - INFO -    [OK] Incluindo router INSS...
+2025-10-30 08:45:15,341 - app.main - INFO -    [OK] Incluindo router Webhook...
+2025-10-30 08:45:15,341 - app.main - INFO -    [OK] Incluindo router Users...
+2025-10-30 08:45:15,343 - app.main - INFO - [OK] Todos os routers incluidos com sucesso
+2025-10-30 08:45:15,344 - app.main - INFO - ================================================================================
+2025-10-30 08:45:15,345 - app.main - INFO - [START] INICIANDO LIFESPAN CONTEXT MANAGER
+2025-10-30 08:45:15,345 - app.main - INFO - ================================================================================
+2025-10-30 08:45:15,345 - app.main - INFO - [CONFIG] Carregando configuracoes...
+2025-10-30 08:45:15,345 - app.main - INFO - [OK] App Name: INSS Guias API
+2025-10-30 08:45:15,345 - app.main - INFO - [OK] App Version: 1.0.0
+2025-10-30 08:45:15,345 - app.main - INFO - ================================================================================
+2025-10-30 08:45:15,347 - app.main - INFO - [OK] LIFESPAN STARTUP COMPLETO - SERVIDOR PRONTO
+2025-10-30 08:45:15,347 - app.main - INFO - ================================================================================
+2025-10-30 08:45:19,685 - app.main - INFO - [DEBUG] Adding DebugMiddleware...
+2025-10-30 08:45:19,685 - app.main - INFO - [ROUTERS] Incluindo routers...
+2025-10-30 08:45:19,685 - app.main - INFO -    [OK] Incluindo router INSS...
+2025-10-30 08:45:19,687 - app.main - INFO -    [OK] Incluindo router Webhook...
+2025-10-30 08:45:19,688 - app.main - INFO -    [OK] Incluindo router Users...
+2025-10-30 08:45:19,690 - app.main - INFO - [OK] Todos os routers incluidos com sucesso
+2025-10-30 08:45:19,691 - app.main - INFO - ================================================================================
+2025-10-30 08:45:19,691 - app.main - INFO - [START] INICIANDO LIFESPAN CONTEXT MANAGER
+2025-10-30 08:45:19,691 - app.main - INFO - ================================================================================
+2025-10-30 08:45:19,692 - app.main - INFO - [CONFIG] Carregando configuracoes...
+2025-10-30 08:45:19,692 - app.main - INFO - [OK] App Name: INSS Guias API
+2025-10-30 08:45:19,692 - app.main - INFO - [OK] App Version: 1.0.0
+2025-10-30 08:45:19,692 - app.main - INFO - ================================================================================
+2025-10-30 08:45:19,693 - app.main - INFO - [OK] LIFESPAN STARTUP COMPLETO - SERVIDOR PRONTO
+2025-10-30 08:45:19,693 - app.main - INFO - ================================================================================
+2025-10-30 08:45:27,846 - app.main - INFO - ================================================================================
+2025-10-30 08:45:27,847 - app.main - INFO - [REQUEST] POST /api/v1/guias/emitir
+2025-10-30 08:45:27,847 - app.main - INFO -    Headers: {'user-agent': 'Mozilla/5.0 (Windows NT; Windows NT 10.0; pt-BR) WindowsPowerShell/5.1.26100.6899', 'content-type': 'application/json', 'host': '127.0.0.1:9000', 'content-length': '121'}
+2025-10-30 08:45:27,847 - app.main - INFO - ================================================================================
+2025-10-30 08:45:28,010 - app.main - INFO - ================================================================================
+2025-10-30 08:45:28,011 - app.main - INFO - [RESPONSE] Status 200
+2025-10-30 08:45:28,011 - app.main - INFO -    Tempo: 0.163s
+2025-10-30 08:45:28,011 - app.main - INFO - ================================================================================
+2025-10-30 08:45:45,983 - app.main - INFO - ================================================================================
+2025-10-30 08:45:45,983 - app.main - INFO - [REQUEST] POST /api/v1/guias/complementacao
+2025-10-30 08:45:45,983 - app.main - INFO -    Headers: {'user-agent': 'Mozilla/5.0 (Windows NT; Windows NT 10.0; pt-BR) WindowsPowerShell/5.1.26100.6899', 'content-type': 'application/json', 'host': '127.0.0.1:9000', 'content-length': '86'}
+2025-10-30 08:45:45,984 - app.main - INFO - ================================================================================
+2025-10-30 08:45:45,988 - app.main - INFO - ================================================================================
+2025-10-30 08:45:45,989 - app.main - INFO - [RESPONSE] Status 200
+2025-10-30 08:45:45,989 - app.main - INFO -    Tempo: 0.004s
+2025-10-30 08:45:45,989 - app.main - INFO - ================================================================================
+2025-10-30 08:46:02,319 - app.main - INFO - [DEBUG] Adding DebugMiddleware...
+2025-10-30 08:46:02,320 - app.main - INFO - [ROUTERS] Incluindo routers...
+2025-10-30 08:46:02,320 - app.main - INFO -    [OK] Incluindo router INSS...
+2025-10-30 08:46:02,322 - app.main - INFO -    [OK] Incluindo router Webhook...
+2025-10-30 08:46:02,323 - app.main - INFO -    [OK] Incluindo router Users...
+2025-10-30 08:46:02,325 - app.main - INFO - [OK] Todos os routers incluidos com sucesso
+2025-10-30 08:46:02,326 - app.main - INFO - ================================================================================
+2025-10-30 08:46:02,326 - app.main - INFO - [START] INICIANDO LIFESPAN CONTEXT MANAGER
+2025-10-30 08:46:02,327 - app.main - INFO - ================================================================================
+2025-10-30 08:46:02,327 - app.main - INFO - [CONFIG] Carregando configuracoes...
+2025-10-30 08:46:02,327 - app.main - INFO - [OK] App Name: INSS Guias API
+2025-10-30 08:46:02,327 - app.main - INFO - [OK] App Version: 1.0.0
+2025-10-30 08:46:02,327 - app.main - INFO - ================================================================================
+2025-10-30 08:46:02,328 - app.main - INFO - [OK] LIFESPAN STARTUP COMPLETO - SERVIDOR PRONTO
+2025-10-30 08:46:02,328 - app.main - INFO - ================================================================================
+2025-10-30 08:46:02,330 - app.main - INFO - ================================================================================
+2025-10-30 08:46:02,330 - app.main - INFO - [STOP] INICIANDO SHUTDOWN DO LIFESPAN
+2025-10-30 08:46:02,331 - app.main - INFO - ================================================================================
+2025-10-30 08:46:02,331 - app.main - INFO - [OK] SHUTDOWN COMPLETO
+2025-10-30 08:46:25,263 - app.main - INFO - [DEBUG] Adding DebugMiddleware...
+2025-10-30 08:46:25,263 - app.main - INFO - [ROUTERS] Incluindo routers...
+2025-10-30 08:46:25,263 - app.main - INFO -    [OK] Incluindo router INSS...
+2025-10-30 08:46:25,267 - app.main - INFO -    [OK] Incluindo router Webhook...
+2025-10-30 08:46:25,268 - app.main - INFO -    [OK] Incluindo router Users...
+2025-10-30 08:46:25,272 - app.main - INFO - [OK] Todos os routers incluidos com sucesso
+2025-10-30 08:46:25,274 - app.main - INFO - ================================================================================
+2025-10-30 08:46:25,275 - app.main - INFO - [START] INICIANDO LIFESPAN CONTEXT MANAGER
+2025-10-30 08:46:25,275 - app.main - INFO - ================================================================================
+2025-10-30 08:46:25,275 - app.main - INFO - [CONFIG] Carregando configuracoes...
+2025-10-30 08:46:25,276 - app.main - INFO - [OK] App Name: INSS Guias API
+2025-10-30 08:46:25,276 - app.main - INFO - [OK] App Version: 1.0.0
+2025-10-30 08:46:25,276 - app.main - INFO - ================================================================================
+2025-10-30 08:46:25,276 - app.main - INFO - [OK] LIFESPAN STARTUP COMPLETO - SERVIDOR PRONTO
+2025-10-30 08:46:25,277 - app.main - INFO - ================================================================================
+2025-10-30 08:46:25,279 - app.main - INFO - ================================================================================
+2025-10-30 08:46:25,280 - app.main - INFO - [STOP] INICIANDO SHUTDOWN DO LIFESPAN
+2025-10-30 08:46:25,280 - app.main - INFO - ================================================================================
+2025-10-30 08:46:25,280 - app.main - INFO - [OK] SHUTDOWN COMPLETO

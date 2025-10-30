@@ -1,7 +1,7 @@
 from datetime import date
 from typing import Literal, Optional
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 
 from .user import TipoContribuinte
 
@@ -16,7 +16,8 @@ class EmitirGuiaRequest(BaseModel):
     plano: PlanoContribuicao = Field(default="normal")
     competencia: Optional[str] = Field(default=None, description="Competência no formato MM/AAAA")
 
-    @validator("competencia")
+    @field_validator("competencia")
+    @classmethod
     def validar_competencia(cls, value: Optional[str]) -> Optional[str]:
         if value is None:
             return value
