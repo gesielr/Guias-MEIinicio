@@ -1,6 +1,7 @@
 import "dotenv/config";
 import Fastify from "fastify";
 import fastifyCors from "@fastify/cors";
+import fastifyExpress from "@fastify/express";
 import fastifySensible from "@fastify/sensible";
 import { env } from "./env";
 import { registerAuthRoutes } from "../routes/auth";
@@ -12,6 +13,21 @@ import { registerGpsRoutes } from "../routes/gps";
 import { registerPaymentRoutes } from "../routes/payments";
 import { registerWhatsappRoutes } from "../routes/whatsapp";
 import { testSupabaseConnection } from "./test-supabase";
+import { initializeSicoobServices } from "./services/sicoob";
+import { registerSicoobRoutes } from "./routes/sicoob.routes";
+
+function hasSicoobConfiguration(): boolean {
+  const hasFileCert = env.SICOOB_CERT_PATH && env.SICOOB_KEY_PATH;
+  const hasPfx = env.SICOOB_CERT_PFX_BASE64 && env.SICOOB_CERT_PFX_PASS;
+
+  return Boolean(
+    env.SICOOB_API_BASE_URL &&
+      env.SICOOB_AUTH_URL &&
+      env.SICOOB_CLIENT_ID &&
+      env.SICOOB_WEBHOOK_SECRET &&
+      (hasFileCert || hasPfx)
+  );
+}
 
 async function buildServer() {
   const app = Fastify({
@@ -40,6 +56,49 @@ async function buildServer() {
   await registerPaymentRoutes(app);
   await registerWhatsappRoutes(app);
 
+  if (hasSicoobConfiguration()) {
+    await app.register(fastifyExpress);
+
+    // Adicionar parsers Express para corpo e raw body
+    const express = (await import('express')).default;
+    app.use(express.json());
+    app.use(express.urlencoded({ extended: true }));
+
+    initializeSicoobServices({
+      environment: env.SICOOB_ENVIRONMENT ?? "sandbox",
+      baseUrl: env.SICOOB_API_BASE_URL!,
+      authUrl: env.SICOOB_AUTH_URL!,
+      authValidateUrl: env.SICOOB_AUTH_VALIDATE_URL,
+      clientId: env.SICOOB_CLIENT_ID!,
+      clientSecret: env.SICOOB_CLIENT_SECRET || undefined,
+      certPath: env.SICOOB_CERT_PATH || undefined,
+      keyPath: env.SICOOB_KEY_PATH || undefined,
+      caPath: env.SICOOB_CA_PATH || undefined,
+      caBase64: env.SICOOB_CA_BASE64 || undefined,
+      pfxBase64: env.SICOOB_CERT_PFX_BASE64 || undefined,
+      pfxPassphrase: env.SICOOB_CERT_PFX_PASS || undefined,
+      webhookSecret: env.SICOOB_WEBHOOK_SECRET,
+      cooperativa: env.SICOOB_COOPERATIVA,
+      conta: env.SICOOB_CONTA,
+      scopes: env.SICOOB_SCOPES
+        ? env.SICOOB_SCOPES.split(/[,\s]+/)
+            .filter(Boolean)
+        : undefined,
+    });
+
+    registerSicoobRoutes(
+      app as any,
+      env.SICOOB_WEBHOOK_SECRET!,
+      "/api/sicoob"
+    );
+
+    app.log.info("Integra��o Sicoob inicializada");
+  } else {
+    app.log.warn(
+      "Vari�veis de ambiente Sicoob ausentes. Rotas Sicoob n�o foram registradas."
+    );
+  }
+
   return app;
 }
 
@@ -51,12 +110,12 @@ buildServer()
         process.exit(1);
       }
       app.log.info(`API GuiasMEI escutando em ${address}`);
-      if (env.NODE_ENV !== 'test') {
+      if (env.NODE_ENV !== "test") {
         try {
           startScheduler();
-          app.log.info('NFSe scheduler started');
+          app.log.info("NFSe scheduler started");
         } catch (err) {
-          app.log.error(err, 'Failed to start NFSe scheduler');
+          app.log.error(err, "Failed to start NFSe scheduler");
         }
       }
     });

@@ -76,29 +76,19 @@ async def emitir_guia(request: EmitirGuiaRequest):
     """
     Emite guia INSS e envia via WhatsApp.
     """
-    print(f"\n[SERVIDOR] === REQUISICAO POST /emitir RECEBIDA ===")
-    print(f"[SERVIDOR] Payload recebido: {request.model_dump()}")
-    
     try:
-        print(f"\n[EMITIR] Iniciando com payload: {request.model_dump()}")
-        
         if not validar_whatsapp(request.whatsapp):
             raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="WhatsApp inválido.")
 
-        print(f"[EMITIR] WhatsApp validado: {request.whatsapp}")
-
         calculo = _calcular_por_tipo(request)
-        print(f"[EMITIR] Cálculo realizado: {calculo}")
         
         competencia = request.competencia or datetime.utcnow().strftime("%m/%Y")
         competencia = normalizar_competencia(competencia)
         vencimento = calcular_vencimento_padrao(competencia)
-        print(f"[EMITIR] Competência normalizada: {competencia}")
 
         usuario = await _obter_ou_criar_usuario(
             {"whatsapp": request.whatsapp, "tipo_contribuinte": request.tipo_contribuinte}
         )
-        print(f"[EMITIR] Usuário obtido/criado: {usuario}")
 
         dados_contribuinte = {
             "nome": usuario.get("nome"),
@@ -107,7 +97,6 @@ async def emitir_guia(request: EmitirGuiaRequest):
             "whatsapp": request.whatsapp,
         }
 
-        print(f"[EMITIR] Gerando PDF...")
         try:
             pdf_bytes = await run_in_threadpool(
                 pdf_generator.gerar_guia,
@@ -116,12 +105,9 @@ async def emitir_guia(request: EmitirGuiaRequest):
                 calculo.codigo_gps,
                 competencia,
             )
-            print(f"[EMITIR] PDF gerado com sucesso: {len(pdf_bytes)} bytes")
         except Exception as pdf_error:
-            print(f"[ERROR] ERRO NA GERACAO DO PDF: {str(pdf_error)}")
             import traceback
-            print(f"[ERROR] Traceback PDF: {traceback.format_exc()}")
-            raise
+            raise HTTPException(status_code=500, detail=f"Erro ao gerar PDF: {str(pdf_error)}")
 
         guia_salva = await supabase_service.salvar_guia(
             user_id=usuario["id"],
@@ -133,16 +119,13 @@ async def emitir_guia(request: EmitirGuiaRequest):
                 "data_vencimento": vencimento.isoformat(),
             },
         )
-        print(f"[EMITIR] Guia salva: {guia_salva}")
 
         mensagem = (
             f"Sua guia do INSS código {calculo.codigo_gps} no valor de R$ {calculo.valor:,.2f} está pronta. "
             f"Vencimento em {vencimento.strftime('%d/%m/%Y')}."
         )
-        print(f"[EMITIR] Enviando WhatsApp para {request.whatsapp}...")
         
         envio = await whatsapp_service.enviar_pdf_whatsapp(request.whatsapp, pdf_bytes, mensagem)
-        print(f"[EMITIR] WhatsApp enviado: {envio}")
 
         return {
             "guia": guia_salva,
@@ -151,11 +134,7 @@ async def emitir_guia(request: EmitirGuiaRequest):
         }
     except Exception as e:
         import traceback
-        print(f"\n[ERROR] ERRO NA ROTA /emitir: {type(e).__name__}: {str(e)}")
-        print(f"[ERROR] Traceback completo:")
-        print(traceback.format_exc())
-        print(f"[ERROR] === FIM DO ERRO ===")
-        raise
+        raise HTTPException(status_code=500, detail=f"Erro: {str(e)}")
 
 
 @router.post("/complementacao")
@@ -164,8 +143,6 @@ async def emitir_complementacao(request: ComplementacaoRequest):
     Emite guia de complementação 11% → 20%.
     """
     try:
-        print(f"\n[COMPLEMENTACAO] Iniciando com payload: {request.model_dump()}")
-
         if not validar_whatsapp(request.whatsapp):
             raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="WhatsApp inválido.")
 
@@ -173,10 +150,8 @@ async def emitir_complementacao(request: ComplementacaoRequest):
         calculo = calculator.calcular_complementacao(competencias, request.valor_base)
         competencia_principal = competencias[-1]
         vencimento = calcular_vencimento_padrao(competencia_principal)
-        print(f"[OK] [COMPLEMENTACAO] Cálculo realizado: {calculo}")
 
         usuario = await _obter_ou_criar_usuario({"whatsapp": request.whatsapp, "tipo_contribuinte": "complementacao"})
-        print(f"[OK] [COMPLEMENTACAO] Usuário obtido/criado: {usuario}")
 
         dados_contribuinte = {
             "nome": usuario.get("nome"),
@@ -192,7 +167,6 @@ async def emitir_complementacao(request: ComplementacaoRequest):
             calculo.codigo_gps,
             competencia_principal,
         )
-        print(f"[OK] [COMPLEMENTACAO] PDF gerado: {len(pdf_bytes)} bytes")
 
         guia_salva = await supabase_service.salvar_guia(
             user_id=usuario["id"],
@@ -204,16 +178,13 @@ async def emitir_complementacao(request: ComplementacaoRequest):
                 "data_vencimento": vencimento.isoformat(),
             },
         )
-        print(f"[OK] [COMPLEMENTACAO] Guia salva: {guia_salva}")
 
         mensagem = (
             f"Complementação gerada (código {calculo.codigo_gps}). "
             f"Total com juros: R$ {calculo.valor:,.2f}. Vencimento {vencimento.strftime('%d/%m/%Y')}."
         )
-        print(f"[OK] [COMPLEMENTACAO] Enviando WhatsApp para {request.whatsapp}...")
         
         envio = await whatsapp_service.enviar_pdf_whatsapp(request.whatsapp, pdf_bytes, mensagem)
-        print(f"[OK] [COMPLEMENTACAO] WhatsApp enviado: {envio}")
 
         return {
             "guia": guia_salva,
@@ -221,8 +192,5 @@ async def emitir_complementacao(request: ComplementacaoRequest):
             "detalhes_calculo": calculo.detalhes,
         }
     except Exception as e:
-        import traceback
-        print(f"\n[ERROR] [COMPLEMENTACAO] ERRO: {str(e)}")
-        print(f"   Traceback: {traceback.format_exc()}\n")
-        raise
+        raise HTTPException(status_code=500, detail=f"Erro: {str(e)}")
 

@@ -22,7 +22,7 @@ const envSchema = z.object({
   
   // URLs baseadas no ambiente
   NFSE_BASE_URL: z.string().url().transform((val, ctx) => {
-    const env = ctx.parent?.NFSE_ENVIRONMENT || 'production';
+    const env = (ctx as any)._data?.NFSE_ENVIRONMENT || 'production';
     if (env === 'homologation') {
       return 'https://homologacao.adn.nfse.gov.br';
     }
@@ -40,7 +40,26 @@ const envSchema = z.object({
   NFSE_CERT_PKCS11_LIBRARY: z.string().optional(),
   NFSE_CERT_PKCS11_SLOT: z.string().optional(),
   NFSE_CERT_PKCS11_PIN: z.string().optional(),
-  NFSE_CREDENTIAL_SECRET: z.string().min(16, "NFSE_CREDENTIAL_SECRET must be at least 16 characters")
+  NFSE_CREDENTIAL_SECRET: z.string().min(16, "NFSE_CREDENTIAL_SECRET must be at least 16 characters"),
+
+  // Configurações Sicoob
+  SICOOB_ENVIRONMENT: z.enum(['sandbox', 'production']).optional(),
+  SICOOB_API_BASE_URL: z.string().url().optional(),
+  SICOOB_AUTH_URL: z.string().url().optional(),
+  SICOOB_AUTH_VALIDATE_URL: z.string().url().optional(),
+  SICOOB_CLIENT_ID: z.string().optional(),
+  SICOOB_CLIENT_SECRET: z.string().optional(),
+  SICOOB_CERT_PATH: z.string().optional(),
+  SICOOB_KEY_PATH: z.string().optional(),
+  SICOOB_CA_PATH: z.string().optional(),
+  SICOOB_CA_BASE64: z.string().optional(),
+  SICOOB_CERT_PFX_BASE64: z.string().optional(),
+  SICOOB_CERT_PFX_PASS: z.string().optional(),
+  SICOOB_WEBHOOK_SECRET: z.string().optional(),
+  SICOOB_JWT_SECRET: z.string().optional(),
+  SICOOB_SCOPES: z.string().optional(),
+  SICOOB_COOPERATIVA: z.string().optional(),
+  SICOOB_CONTA: z.string().optional()
 });
 
 export const env = envSchema.parse(process.env);

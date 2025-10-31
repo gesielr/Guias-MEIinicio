@@ -1,0 +1,39 @@
+{"timestamp":"2025-10-31T00:16:47.879Z","level":"debug","service":"sicoob","message":"Carregando certificados mTLS","context":{"pfx":true}}
+{"timestamp":"2025-10-31T00:16:47.929Z","level":"info","service":"sicoob","message":"Agente HTTPS mTLS configurado","context":{"rejectUnauthorized":false}}
+{"timestamp":"2025-10-31T00:18:33.760Z","level":"debug","service":"sicoob","message":"Carregando certificados mTLS","context":{"pfx":true}}
+{"timestamp":"2025-10-31T00:18:33.809Z","level":"info","service":"sicoob","message":"Agente HTTPS mTLS configurado","context":{"rejectUnauthorized":false}}
+{"timestamp":"2025-10-31T00:18:33.813Z","level":"info","service":"sicoob","message":"SicoobAuthService inicializado","context":{"environment":"sandbox","baseUrl":"https://api.sicoob.com.br"}}
+{"timestamp":"2025-10-31T00:18:33.835Z","level":"info","service":"sicoob","message":"SicoobPixService inicializado","context":null}
+{"timestamp":"2025-10-31T00:18:33.857Z","level":"info","service":"sicoob","message":"SicoobBoletoService inicializado","context":null}
+{"timestamp":"2025-10-31T00:18:33.857Z","level":"info","service":"sicoob","message":"SicoobCobrancaService inicializado","context":null}
+{"timestamp":"2025-10-31T00:18:33.859Z","level":"debug","service":"sicoob","message":"Requisitando token (tentativa 1)","context":null}
+{"timestamp":"2025-10-31T00:18:33.929Z","level":"warn","service":"sicoob","message":"Erro ao requisitar token (tentativa 1/3)","context":{"library":"x509 certificate routines","reason":"key values mismatch","code":"ERR_OSSL_X509_KEY_VALUES_MISMATCH"}}
+{"timestamp":"2025-10-31T00:18:33.931Z","level":"debug","service":"sicoob","message":"Aguardando para nova tentativa","context":{"delay":1000}}
+{"timestamp":"2025-10-31T00:18:34.932Z","level":"debug","service":"sicoob","message":"Requisitando token (tentativa 2)","context":null}
+{"timestamp":"2025-10-31T00:18:34.939Z","level":"warn","service":"sicoob","message":"Erro ao requisitar token (tentativa 2/3)","context":{"library":"x509 certificate routines","reason":"key values mismatch","code":"ERR_OSSL_X509_KEY_VALUES_MISMATCH"}}
+{"timestamp":"2025-10-31T00:18:34.940Z","level":"debug","service":"sicoob","message":"Aguardando para nova tentativa","context":{"delay":2000}}
+{"timestamp":"2025-10-31T00:18:36.955Z","level":"debug","service":"sicoob","message":"Requisitando token (tentativa 3)","context":null}
+{"timestamp":"2025-10-31T00:18:36.964Z","level":"warn","service":"sicoob","message":"Erro ao requisitar token (tentativa 3/3)","context":{"library":"x509 certificate routines","reason":"key values mismatch","code":"ERR_OSSL_X509_KEY_VALUES_MISMATCH"}}
+{"timestamp":"2025-10-31T02:53:43.191Z","level":"debug","service":"sicoob","message":"Carregando certificados mTLS","context":{"certPath":"./certificates/sicoob-cert.pem","pfx":false}}
+{"timestamp":"2025-10-31T02:55:53.832Z","level":"debug","service":"sicoob","message":"Carregando certificados mTLS","context":{"certPath":"./certificates/sicoob-cert.pem","keyPath":"./certificates/chave_privada.pem","pfx":false}}
+{"timestamp":"2025-10-31T02:55:53.834Z","level":"info","service":"sicoob","message":"Agente HTTPS mTLS configurado","context":{"rejectUnauthorized":false}}
+{"timestamp":"2025-10-31T02:55:53.835Z","level":"info","service":"sicoob","message":"SicoobAuthService inicializado","context":{"environment":"sandbox","baseUrl":"https://api.sicoob.com.br"}}
+{"timestamp":"2025-10-31T02:55:53.836Z","level":"info","service":"sicoob","message":"SicoobPixService inicializado","context":null}
+{"timestamp":"2025-10-31T02:55:53.838Z","level":"info","service":"sicoob","message":"SicoobBoletoService inicializado","context":null}
+{"timestamp":"2025-10-31T02:55:53.838Z","level":"info","service":"sicoob","message":"SicoobCobrancaService inicializado","context":null}
+{"timestamp":"2025-10-31T02:55:53.839Z","level":"debug","service":"sicoob","message":"Requisitando token (tentativa 1)","context":null}
+{"timestamp":"2025-10-31T03:03:33.678Z","level":"debug","service":"sicoob","message":"Carregando certificados mTLS","context":{"certPath":"./certificates/sicoob-cert.pem","keyPath":"./certificates/chave_privada.pem","pfx":false}}
+{"timestamp":"2025-10-31T03:03:33.679Z","level":"info","service":"sicoob","message":"Agente HTTPS mTLS configurado","context":{"rejectUnauthorized":false}}
+{"timestamp":"2025-10-31T03:03:33.680Z","level":"info","service":"sicoob","message":"SicoobAuthService inicializado","context":{"environment":"sandbox","baseUrl":"https://api.sicoob.com.br"}}
+{"timestamp":"2025-10-31T03:03:33.681Z","level":"info","service":"sicoob","message":"SicoobPixService inicializado","context":null}
+{"timestamp":"2025-10-31T03:03:33.682Z","level":"info","service":"sicoob","message":"SicoobBoletoService inicializado","context":null}
+{"timestamp":"2025-10-31T03:03:33.682Z","level":"info","service":"sicoob","message":"SicoobCobrancaService inicializado","context":null}
+{"timestamp":"2025-10-31T03:03:33.683Z","level":"debug","service":"sicoob","message":"Requisitando token (tentativa 1)","context":null}
+{"timestamp":"2025-10-31T03:04:40.917Z","level":"debug","service":"sicoob","message":"Carregando certificados mTLS","context":{"certPath":"./certificates/sicoob-cert.pem","keyPath":"./certificates/chave_privada.pem","pfx":false}}
+{"timestamp":"2025-10-31T03:04:40.919Z","level":"info","service":"sicoob","message":"Agente HTTPS mTLS configurado","context":{"rejectUnauthorized":false}}
+{"timestamp":"2025-10-31T03:04:40.920Z","level":"info","service":"sicoob","message":"SicoobAuthService inicializado","context":{"environment":"sandbox","baseUrl":"https://api.sicoob.com.br"}}
+{"timestamp":"2025-10-31T03:04:40.922Z","level":"info","service":"sicoob","message":"SicoobPixService inicializado","context":null}
+{"timestamp":"2025-10-31T03:04:40.922Z","level":"info","service":"sicoob","message":"SicoobBoletoService inicializado","context":null}
+{"timestamp":"2025-10-31T03:04:40.923Z","level":"info","service":"sicoob","message":"SicoobCobrancaService inicializado","context":null}
+{"timestamp":"2025-10-31T03:04:40.923Z","level":"debug","service":"sicoob","message":"Requisitando token (tentativa 1)","context":null}
+{"timestamp":"2025-10-31T03:04:41.241Z","level":"info","service":"sicoob","message":"Token obtido com sucesso","context":{"expiresIn":300,"attemptUsed":1}}

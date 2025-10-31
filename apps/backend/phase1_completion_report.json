@@ -1,0 +1,27 @@
+{
+  "timestamp": "2025-10-30T14:46:24.899058",
+  "steps_completed": [
+    "create_buckets",
+    "sql_setup_recommended",
+    "verify_credentials"
+  ],
+  "errors": [],
+  "buckets_created": [
+    {
+      "name": "pdf-gps",
+      "status": "created"
+    },
+    {
+      "name": "certificados",
+      "status": "created"
+    },
+    {
+      "name": "danfse",
+      "status": "created"
+    }
+  ],
+  "conformity": {
+    "total": 5,
+    "passed": 2
+  }
+}
