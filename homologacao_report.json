@@ -1,0 +1,56 @@
+{
+  "timestamp": "2025-11-01T00:43:15.701Z",
+  "summary": {
+    "total": 9,
+    "success": 6,
+    "fail": 1,
+    "skip": 2
+  },
+  "results": [
+    {
+      "test": "Configuração endpoint",
+      "status": "SUCCESS",
+      "message": "Endpoint configurado: https://adn.producaorestrita.nfse.gov.br/"
+    },
+    {
+      "test": "Conectividade endpoint",
+      "status": "SUCCESS",
+      "message": "Endpoint acessível (404 esperado para /health)"
+    },
+    {
+      "test": "Variáveis certificado",
+      "status": "SUCCESS",
+      "message": "Método: supabase_vault, Certificado: MIIjoAIBAzCCI2YGCSqG..."
+    },
+    {
+      "test": "Decodificação certificado",
+      "status": "SUCCESS",
+      "message": "Certificado decodificado (9124 bytes)"
+    },
+    {
+      "test": "Carregar DPS exemplo",
+      "status": "SUCCESS",
+      "message": "DPS carregado (1245 caracteres)"
+    },
+    {
+      "test": "Processar DPS (simulado)",
+      "status": "SKIP",
+      "message": "Processamento DPS requer módulo NfseService. Validação XSD/assinatura disponível no serviço."
+    },
+    {
+      "test": "Emissão NFSe (simulada)",
+      "status": "SKIP",
+      "message": "Emissão real desabilitada para testes. Habilite manualmente se necessário."
+    },
+    {
+      "test": "API INSS disponível",
+      "status": "SUCCESS",
+      "message": "API INSS respondendo em http://localhost:8000"
+    },
+    {
+      "test": "Emissão guia INSS",
+      "status": "FAIL",
+      "message": "API retornou status 422"
+    }
+  ]
+}
