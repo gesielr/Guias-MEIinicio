@@ -54,7 +54,10 @@ export function AuthProvider({ children }) {
       },
       async register(payload) {
         const appMode = import.meta.env.VITE_APP_MODE ?? "mock";
-        if (appMode === "mock") {
+        // Se Supabase não está configurado, sempre usar mock
+        const supabaseConfigured = import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY;
+        
+        if (!supabaseConfigured || appMode === "mock" || appMode === "development") {
           const mockSession = {
             access_token: `mock_access_token_${Math.random()}`,
             refresh_token: `mock_refresh_token_${Math.random()}`,
