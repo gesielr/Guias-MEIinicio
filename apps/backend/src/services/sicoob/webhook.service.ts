@@ -6,6 +6,11 @@
 import * as crypto from 'crypto';
 import { WebhookEvent, WebhookEventType, WebhookPayload } from './types';
 import { sicoobLogger } from '../../utils/sicoob-logger';
+import { getPaymentCertService } from '../certificate/payment-cert.service';
+import { getCertNotificationService } from '../email/cert-notification.service';
+import { createSupabaseClients } from '../../../services/supabase';
+
+const { admin } = createSupabaseClients();
 
 export type WebhookHandler = (event: WebhookEvent) => Promise<void>;
 
@@ -251,6 +256,40 @@ export class SicoobWebhookService {
       
       // Acionar fila de notificação
       await this.acionarNotificacao(event.dados.txid, 'pagamento_recebido', event.dados);
+
+      // Integração fluxo Certificado Digital
+      try {
+        // Verifica se este TXID pertence a um pagamento de certificado
+        const { data: pagamento } = await admin
+          .from('payment_cert_digital')
+          .select('user_id, status')
+          .eq('txid', event.dados.txid)
+          .single();
+
+        if (pagamento) {
+          if (pagamento.status !== 'PAID') {
+            const paymentService = getPaymentCertService();
+            await paymentService.marcarPagamentoComoPago(event.dados.txid);
+
+            const notify = getCertNotificationService();
+            await notify.notificarCertificadora(pagamento.user_id);
+            await notify.notificarUsuarioPagamentoConfirmado(pagamento.user_id);
+
+            sicoobLogger.info('Fluxo Certificado: pagamento confirmado e notificações enviadas', {
+              txid: event.dados.txid,
+              user_id: pagamento.user_id,
+            });
+          } else {
+            sicoobLogger.debug('Fluxo Certificado: pagamento já estava marcado como PAID', {
+              txid: event.dados.txid,
+            });
+          }
+        }
+      } catch (err) {
+        sicoobLogger.error('Erro no fluxo Certificado após PIX recebido', err as Error, {
+          txid: event.dados.txid,
+        });
+      }
     });
 
     // PIX Devolvido

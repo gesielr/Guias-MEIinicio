@@ -1,5 +1,7 @@
 # 🚀 GuiasMEI - Plataforma Completa de Gestão Fiscal
 
+[![CI](https://github.com/gesielr/guiasMEIslast/actions/workflows/ci.yml/badge.svg)](https://github.com/gesielr/guiasMEIslast/actions/workflows/ci.yml)
+
 > **Solução inovadora para emissão automatizada de guias GPS e notas fiscais NFS-e através de atendimento via WhatsApp com IA especializada.**
 
 ## 🎯 Visão Geral
@@ -49,7 +51,56 @@ O **GuiasMEI** é uma plataforma full-stack que revoluciona a gestão fiscal de 
 └── partner_clients - Vínculos parceiro-cliente
 ```
 
-## 🎨 Interface e Experiência
+## � Novidades — Certificado Digital ICP-Brasil (11/2025)
+
+Implementamos a base de dados e especificação completa para o fluxo de certificado digital ICP-Brasil com assinatura remota e pagamentos via PIX Sicoob.
+
+- Tabelas (Supabase):
+  - cert_providers, cert_enrollments, sign_requests, sign_audit_logs, payment_cert_digital
+- Segurança: RLS restritiva; sem armazenamento de PFX/senha/chave privada (metadados apenas)
+- Integração: Webhooks da certificadora (HMAC), assinatura remota, PIX R$ 150
+- Documentos de referência: `docs/FLUXO_COMPLETO_CERTIFICADO_DIGITAL.md`, `docs/ANALISE_GAP_CERTIFICADO.md`, `docs/DIAGNOSTICO_CERTIFICADO_DIGITAL.md`
+
+### Status atual do backend (Nov/2025)
+
+- ✅ Schema Supabase e migrations dedicadas ao certificado (`supabase/migrations/20251101090000_create_cert_icp_tables.sql`)
+- ✅ Endpoints Fastify para consulta de datas, enrollment, assinatura e webhooks (modo mock da Certisign)
+- ✅ Serviço de pagamento PIX integrado ao Sicoob e reconciliado via webhook (`payment_cert_digital`)
+- ✅ Serviço de notificação por email estruturado (envio ainda em modo mock, pronto para SendGrid/Resend)
+- ⚠️ Integração real com a API Certisign pendente (CertificateService opera em modo mock)
+- ⚠️ Notificações WhatsApp para aprovação e confirmação a serem implementadas
+- ⚠️ NFSe ainda usa assinatura local; migração para assinatura remota planejada
+- ⚠️ Jobs de expiração, testes E2E e dashboards administrativos em backlog
+
+> Consulte os documentos acima para o plano completo, lacunas identificadas e roadmap por sprint.
+
+Como aplicar as migrações (opcional, com Supabase CLI):
+
+```powershell
+# (Opcional) Validar conexão do projeto
+supabase projects list
+
+# Aplicar todas as migrações pendentes
+supabase db push
+
+# OU: executar somente o novo arquivo (se preferir rodar manualmente)
+# Arquivo: supabase/migrations/20251101090000_create_cert_icp_tables.sql
+```
+
+Variáveis de ambiente (novas):
+
+```env
+# Certificadora (ex.: Certisign)
+CERTISIGN_API_KEY=sk_...
+CERTISIGN_API_BASE_URL=https://api.certisign.com.br
+CERTISIGN_WEBHOOK_SECRET=whsec_...
+CERTISIGN_EMAIL_CERTIFICADORA=rebelocontabil@gmail.com
+
+# Backend público (para callbacks)
+BACKEND_URL=https://api.seu-dominio.com.br
+```
+
+## �🎨 Interface e Experiência
 
 ### **Design System Moderno**
 - **Paleta**: Azuis profissionais (#3b82f6, #2563eb)
@@ -413,12 +464,28 @@ guiasMEI/
 ## 📊 Scripts Disponíveis
 
 ### **Root Level (npm)**
+## 🧪 CI/CD (GitHub Actions)
+
+Este repositório contém pipeline CI em `.github/workflows/ci.yml` com:
+
+- Build do frontend (Vite) e backend (TypeScript/tsup)
+- Testes web e backend (Vitest), e job opcional Windows executando `run-tests.ps1`
+- Cache de dependências para Node.js
+
+Executa em push/PR para `main`. O status aparece no badge no topo do README.
+
+Como rodar localmente (Windows PowerShell):
+
+```powershell
 | Comando | Descrição |
 |---------|-----------|
 | `npm run dev` | Inicia todos os serviços (frontend + backends) |
 | `npm run build` | Build de produção (frontend + packages) |
 | `npm test` | Executa testes (todos os pacotes) |
 | `npm run lint` | Lint de código (ESLint) |
+
+Logs e relatórios de testes são salvos na raiz quando aplicável (ex.: `test_results.json`).
+
 
 ### **Frontend (apps/web)**
 | Comando | Descrição |

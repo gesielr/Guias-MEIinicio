@@ -1,5 +1,5 @@
 import { FastifyInstance } from 'fastify';
-import { NfseService } from '../services/nfse.service';
+import { NfseService, EmitNfseDto } from '../services/nfse.service';
 import { createAdnClient } from '../../adapters/adn-client';
 
 export async function nfseRoutes(app: FastifyInstance) {
@@ -8,7 +8,7 @@ export async function nfseRoutes(app: FastifyInstance) {
   // 1. Emissão NFS-e
   app.post('/nfse', async (request, reply) => {
     try {
-      const result = await nfseService.emit(request.body);
+      const result = await nfseService.emit(request.body as EmitNfseDto);
       reply.send(result);
     } catch (err: any) {
       reply.status(400).send({ error: err.message });

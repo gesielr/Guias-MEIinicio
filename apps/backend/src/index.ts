@@ -15,16 +15,17 @@ import { registerWhatsappRoutes } from "../routes/whatsapp";
 import { testSupabaseConnection } from "./test-supabase";
 import { initializeSicoobServices } from "./services/sicoob";
 import { registerSicoobRoutes } from "./routes/sicoob.routes";
+import { certisignRoutes } from "./routes/certisign.routes";
 
 function hasSicoobConfiguration(): boolean {
   const hasFileCert = env.SICOOB_CERT_PATH && env.SICOOB_KEY_PATH;
   const hasPfx = env.SICOOB_CERT_PFX_BASE64 && env.SICOOB_CERT_PFX_PASS;
+  const baseUrl = env.SICOOB_API_BASE_URL || (env as any).SICOOB_PIX_BASE_URL;
 
   return Boolean(
-    env.SICOOB_API_BASE_URL &&
+    baseUrl &&
       env.SICOOB_AUTH_URL &&
       env.SICOOB_CLIENT_ID &&
-      env.SICOOB_WEBHOOK_SECRET &&
       (hasFileCert || hasPfx)
   );
 }
@@ -55,6 +56,7 @@ async function buildServer() {
   await registerGpsRoutes(app);
   await registerPaymentRoutes(app);
   await registerWhatsappRoutes(app);
+  await app.register(certisignRoutes);
 
   if (hasSicoobConfiguration()) {
     await app.register(fastifyExpress);
@@ -66,7 +68,7 @@ async function buildServer() {
 
     initializeSicoobServices({
       environment: env.SICOOB_ENVIRONMENT ?? "sandbox",
-      baseUrl: env.SICOOB_API_BASE_URL!,
+      baseUrl: (env.SICOOB_API_BASE_URL || (env as any).SICOOB_PIX_BASE_URL)!,
       authUrl: env.SICOOB_AUTH_URL!,
       authValidateUrl: env.SICOOB_AUTH_VALIDATE_URL,
       clientId: env.SICOOB_CLIENT_ID!,
@@ -77,7 +79,7 @@ async function buildServer() {
       caBase64: env.SICOOB_CA_BASE64 || undefined,
       pfxBase64: env.SICOOB_CERT_PFX_BASE64 || undefined,
       pfxPassphrase: env.SICOOB_CERT_PFX_PASS || undefined,
-      webhookSecret: env.SICOOB_WEBHOOK_SECRET,
+      webhookSecret: env.SICOOB_WEBHOOK_SECRET || 'dev-webhook-secret',
       cooperativa: env.SICOOB_COOPERATIVA,
       conta: env.SICOOB_CONTA,
       scopes: env.SICOOB_SCOPES
@@ -88,7 +90,7 @@ async function buildServer() {
 
     registerSicoobRoutes(
       app as any,
-      env.SICOOB_WEBHOOK_SECRET!,
+      (env.SICOOB_WEBHOOK_SECRET || 'dev-webhook-secret'),
       "/api/sicoob"
     );
 

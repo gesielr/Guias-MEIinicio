@@ -45,6 +45,9 @@ const envSchema = z.object({
   // Configurações Sicoob
   SICOOB_ENVIRONMENT: z.enum(['sandbox', 'production']).optional(),
   SICOOB_API_BASE_URL: z.string().url().optional(),
+  // Suporte a nomes alternativos definidos no .env atual
+  SICOOB_PIX_BASE_URL: z.string().url().optional(),
+  SICOOB_BOLETO_BASE_URL: z.string().url().optional(),
   SICOOB_AUTH_URL: z.string().url().optional(),
   SICOOB_AUTH_VALIDATE_URL: z.string().url().optional(),
   SICOOB_CLIENT_ID: z.string().optional(),

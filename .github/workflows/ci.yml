@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test-node:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies (workspaces)
+        run: npm ci
+
+      - name: Build web (Vite)
+        run: npm run build
+
+      - name: Build backend (TypeScript)
+        run: npm run build:api
+
+      - name: Test web
+        run: npm run test --workspace=@guiasmei/web --silent
+
+      - name: Test backend
+        run: npm run test --workspace=@guiasmei/backend --silent
+
+  windows-smoke-tests:
+    runs-on: windows-latest
+    continue-on-error: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies (workspaces)
+        shell: pwsh
+        run: npm ci
+
+      - name: Run PowerShell smoke tests (Node only)
+        shell: pwsh
+        run: |
+          ./run-tests.ps1 -TestType node -Verbose $true
