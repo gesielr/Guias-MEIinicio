@@ -1,5 +1,5 @@
 {
-  "name": "@guiasmei/backend",
+  "name": "guiasmei-monorepo",
   "private": true,
   "workspaces": [
     "apps/*",
