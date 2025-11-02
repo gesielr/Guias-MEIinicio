@@ -2,15 +2,12 @@ import { gunzipSync, gzipSync } from "node:zlib";
 import { AxiosError } from "axios";
 import { createAdnClient } from "../adapters/adn-client";
 import { saveEmission, updateEmissionStatus, hashXml, attachPdf } from "../repositories/nfse-emissions.repo";
-import { fetchLatestCredential, getCredentialPfxBuffer } from "../repositories/credentials.repo";
-import { signInfDps } from "../crypto/xml-signer";
-import { pfxToPem, validateCertificate } from "../crypto/pfx-utils";
-import { cleanXml, validateXmlAgainstXsd } from "../utils/xml-utils";
+import { cleanXml } from "../utils/xml-utils";
 import logger from "../../utils/logger";
 import { env } from "../../env";
 import { NfseMetricsService } from "../../services/nfse-metrics.service";
-import { checkCertificateExpiry } from "../../utils/certificate-checker";
 import { fixTribMunOrder } from "../../utils/xml-fixer";
+import { getCertificateService } from "../../services/certificate";
 import * as libxmljs from 'libxmljs';
 import * as zlib from 'zlib';
 import * as fs from 'fs';
@@ -206,58 +203,58 @@ export class NfseService {
     this.validateXmlWithXsd(xml, xsdSchema);
 
     if (!xml.includes('<Signature')) {
-      // Escolher credencial: prioridade para credencial do usuário, depois .env/global
-      let credential: Awaited<ReturnType<typeof fetchLatestCredential>> | null = null;
-      try {
-        credential = await fetchLatestCredential(dto.userId);
-      } catch (err) {
-        logger.warn("[NFSe] Falha ao buscar credencial no Supabase, utilizando fallback do .env", { userId: dto.userId, error: err });
-      }
-      let privateKeyPem: string | undefined;
-      let certificatePem: string | undefined;
-      let certSource = 'unknown';
+      const certService = getCertificateService();
+      const enrollment = await certService.buscarCertificadoUsuario(dto.userId);
 
-      if (!credential && process.env.NFSE_CERT_METHOD === 'supabase_vault' && process.env.NFSE_CERT_PFX_BASE64 && process.env.NFSE_CERT_PFX_PASS) {
-        const pfxBuffer = Buffer.from(process.env.NFSE_CERT_PFX_BASE64, 'base64');
-        ({ privateKeyPem, certificatePem } = pfxToPem(pfxBuffer, process.env.NFSE_CERT_PFX_PASS));
-        certSource = 'global (.env)';
-      } else if (credential) {
-        const pfxBuffer = await getCredentialPfxBuffer(credential.storagePath);
-        ({ privateKeyPem, certificatePem } = pfxToPem(pfxBuffer, credential.pass));
-        certSource = 'usuario';
-      } else {
-        throw new Error('Nenhuma credencial PFX encontrada para o usuario');
+      if (!enrollment) {
+        throw new Error('Usuário não possui certificado digital ativo para assinatura remota');
       }
 
-      // Validação do certificado
-      const cnpjOuCpf = undefined; // se tiver, passar aqui
-      const certStatus = validateCertificate(certificatePem!, cnpjOuCpf);
-      if (certStatus.errors && certStatus.errors.length) {
-        logger.error('[NFSe] Erros de certificado', { userId: dto.userId, errors: certStatus.errors });
-        throw new Error('Certificado invalido ou com erros. Veja logs.');
-      }
-      
-      // Verificar validade do certificado e registrar métrica
-      let pfxBuffer: Buffer;
-      if (credential) {
-        pfxBuffer = await getCredentialPfxBuffer(credential.storagePath);
-      } else {
-        pfxBuffer = Buffer.from(process.env.NFSE_CERT_PFX_BASE64!, 'base64');
-      }
-      
-      const daysUntilExpiry = checkCertificateExpiry(pfxBuffer, credential?.pass || process.env.NFSE_CERT_PFX_PASS!);
+      const daysUntilExpiry = Math.ceil(
+        (new Date(enrollment.valid_until).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+      );
       this.metricsService.recordCertificateCheck(daysUntilExpiry);
-      
-      logger.info('[NFSe] Certificado válido', { 
-        userId: dto.userId, 
-        tipo: certStatus.tipo, 
-        doc: certStatus.doc, 
-        validade: `${certStatus.notBefore} até ${certStatus.notAfter}`,
-        daysUntilExpiry 
+
+      logger.info('[NFSe] Certificado ativo localizado para assinatura remota', {
+        userId: dto.userId,
+        enrollmentId: enrollment.id,
+        validUntil: enrollment.valid_until,
+        daysUntilExpiry
       });
-      logger.info('[NFSe] Assinando XML com certificado', { userId: dto.userId, certSource });
-      xml = signInfDps(xml, { certificatePem: certificatePem!, privateKeyPem: privateKeyPem! });
-      logger.info('[NFSe] XML assinado', { userId: dto.userId, xmlLength: xml.length });
+
+      const hash = certService.gerarHashDPS(xml);
+      logger.info('[NFSe] Hash do XML calculado para assinatura remota', {
+        userId: dto.userId,
+        hashPreview: hash.substring(0, 16)
+      });
+
+      const signRequest = await certService.solicitarAssinaturaRemota(dto.userId, hash, 'DPS');
+      logger.info('[NFSe] Solicitação de assinatura remota criada', {
+        userId: dto.userId,
+        signRequestId: signRequest.id,
+        qrCodeUrl: signRequest.qr_code_url
+      });
+
+      logger.info('[NFSe] Aguardando aprovação da assinatura remota', {
+        userId: dto.userId,
+        signRequestId: signRequest.id
+      });
+      const assinaturaAprovada = await certService.aguardarAprovacaoAssinatura(signRequest.id);
+      if (!assinaturaAprovada.signature_value) {
+        throw new Error('Assinatura remota aprovada sem retorno de signature_value');
+      }
+
+      const signatureXml = certService.montarXMLDSig(
+        hash,
+        assinaturaAprovada.signature_value,
+        enrollment.thumbprint
+      );
+
+      xml = this.injectSignatureIntoDps(xml, signatureXml);
+      logger.info('[NFSe] XML assinado remotamente via Certisign', {
+        userId: dto.userId,
+        signRequestId: assinaturaAprovada.id
+      });
     } else {
       logger.info('[NFSe] XML já estava assinado', { userId: dto.userId });
     }
@@ -446,6 +443,23 @@ export class NfseService {
     } catch (err: any) {
       throw new Error(`Erro na validação XSD: ${err.message}`);
     }
+  }
+
+  /**
+   * Insere o bloco de assinatura remota logo após o fechamento de </infDPS>.
+   */
+  private injectSignatureIntoDps(xml: string, signatureXml: string): string {
+    const closingTag = '</infDPS>';
+    const index = xml.indexOf(closingTag);
+    if (index === -1) {
+      throw new Error('Elemento </infDPS> não encontrado no XML para inserir a assinatura remota');
+    }
+
+    const before = xml.slice(0, index + closingTag.length);
+    const after = xml.slice(index + closingTag.length);
+    const normalizedSignature = `\n${signatureXml.trim()}\n`;
+
+    return `${before}${normalizedSignature}${after}`;
   }
 
   /**

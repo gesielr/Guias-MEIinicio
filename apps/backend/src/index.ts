@@ -9,6 +9,7 @@ import { registerDashboardRoutes } from "../routes/dashboard";
 import { registerNfseController } from "./nfse/controllers/nfse.controller";
 import { registerNfseRoutes } from "../routes/nfse";
 import { startScheduler } from "./nfse/workers/scheduler";
+import { startCertificateScheduler } from "./services/certificate/certificate-scheduler";
 import { registerGpsRoutes } from "../routes/gps";
 import { registerPaymentRoutes } from "../routes/payments";
 import { registerWhatsappRoutes } from "../routes/whatsapp";
@@ -115,7 +116,8 @@ buildServer()
       if (env.NODE_ENV !== "test") {
         try {
           startScheduler();
-          app.log.info("NFSe scheduler started");
+          startCertificateScheduler();
+          app.log.info("Schedulers started");
         } catch (err) {
           app.log.error(err, "Failed to start NFSe scheduler");
         }

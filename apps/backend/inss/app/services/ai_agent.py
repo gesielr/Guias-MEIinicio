@@ -1,42 +1,49 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Dict
 
 try:
     from langchain_openai import ChatOpenAI
     LANGCHAIN_AVAILABLE = True
-except ImportError:
+except ImportError:  # pragma: no cover - fallback em ambientes sem LangChain
     LANGCHAIN_AVAILABLE = False
 
+from ..agents import GuiasMEIAgent, UserType
 from ..config import get_settings
 
 
 class INSSChatAgent:
-    """Agente conversacional para dúvidas sobre INSS."""
+    """Agente conversacional GuiasMEI com prompts especializados por perfil."""
 
     def __init__(self) -> None:
         settings = get_settings()
-        self.openai_api_key = settings.openai_api_key
-        self.llm = None
-        
+        self.llm: Any | None = None
+
         if LANGCHAIN_AVAILABLE and settings.openai_api_key and settings.openai_api_key != "sua-chave-openai":
             try:
                 model_name = getattr(settings, "openai_chat_model", None) or "gpt-5"
                 try:
-                    self.llm = ChatOpenAI(model=model_name, temperature=0.3, openai_api_key=settings.openai_api_key)
+                    self.llm = ChatOpenAI(
+                        model=model_name,
+                        temperature=0.3,
+                        openai_api_key=settings.openai_api_key,
+                    )
                 except Exception:
-                    # Fallback automático para gpt-4o se gpt-5 não estiver disponível
-                    self.llm = ChatOpenAI(model="gpt-4o", temperature=0.3, openai_api_key=settings.openai_api_key)
-            except Exception as e:
-                print(f"⚠ AVISO: Não foi possível inicializar ChatOpenAI: {str(e)[:60]}...")
-        
+                    self.llm = ChatOpenAI(
+                        model="gpt-4o",
+                        temperature=0.3,
+                        openai_api_key=settings.openai_api_key,
+                    )
+            except Exception as exc:  # pragma: no cover
+                print(f"[WARN] Não foi possível inicializar ChatOpenAI: {str(exc)[:60]}...")
+
         self.conhecimento_sal = """
         REGRAS DO SISTEMA SAL (Sistema de Acréscimos Legais):
 
         1. CONTRIBUINTE INDIVIDUAL (Autônomo):
            - Código 1007: 20% sobre valor entre R$1.518 e R$8.157,41
            - Código 1163: 11% sobre salário mínimo (R$166,98 em 2025)
-           - Não tem direito a aposentadoria por tempo no plano simplificado
+           - Não dá direito a aposentadoria por tempo no plano simplificado
 
         2. PRODUTOR RURAL:
            - Código 1503: 20% sobre valor declarado
@@ -51,30 +58,63 @@ class INSSChatAgent:
            - Incide juros SELIC sobre valores em atraso
         """
 
-    async def processar_mensagem(self, mensagem_usuario: str, contexto_usuario: dict[str, Any]) -> str:
-        """
-        Processa mensagem do usuário e retorna resposta da IA.
-        """
-        
+    async def processar_mensagem(
+        self,
+        mensagem_usuario: str,
+        contexto_usuario: Dict[str, Any],
+    ) -> str:
+        """Processa mensagem do usuário e retorna resposta personalizada."""
+
+        user_type = self._mapear_tipo_usuario(contexto_usuario)
+
         if not self.llm:
-            # Resposta padrão quando LangChain não está disponível
-            return self._resposta_padrao(mensagem_usuario, contexto_usuario)
-        
+            return self._resposta_padrao(mensagem_usuario, contexto_usuario, user_type)
+
+        agente = GuiasMEIAgent(
+            user_type=user_type,
+            llm=self.llm,
+            extra_sections=[self.conhecimento_sal],
+        )
+
         try:
-            entrada = f"Contexto: {contexto_usuario}\n\nPergunta: {mensagem_usuario}"
-            resposta = await self.llm.ainvoke(entrada)
-            return resposta.content if hasattr(resposta, 'content') else str(resposta)
-        except Exception as e:
-            print(f"✗ Erro ao processar com IA: {str(e)[:60]}...")
-            return self._resposta_padrao(mensagem_usuario, contexto_usuario)
-    
-    def _resposta_padrao(self, mensagem_usuario: str, contexto_usuario: dict[str, Any]) -> str:
-        """Resposta padrão sem IA"""
-        return f"""
-        Olá! Recebi sua pergunta: "{mensagem_usuario}"
-        
-        Base de conhecimento do INSS:
-        {self.conhecimento_sal}
-        
-        Para respostas mais específicas, configure sua chave OpenAI em apps/backend/.env
-        """
+            return await agente.processar_mensagem(mensagem_usuario, contexto_usuario)
+        except Exception as exc:  # pragma: no cover
+            print(f"[WARN] Erro ao processar com IA: {str(exc)[:60]}...")
+            return self._resposta_padrao(mensagem_usuario, contexto_usuario, user_type)
+
+    def _mapear_tipo_usuario(self, contexto_usuario: Dict[str, Any]) -> UserType:
+        bruto = (
+            contexto_usuario.get("user_type")
+            or contexto_usuario.get("perfil")
+            or contexto_usuario.get("tipo_contribuinte")
+            or contexto_usuario.get("segmento")
+            or ""
+        )
+        valor = str(bruto).strip().lower()
+
+        if any(palavra in valor for palavra in ("mei", "microempreendedor")):
+            return "mei"
+        if any(palavra in valor for palavra in ("autonomo", "autônomo", "contribuinte")):
+            return "autonomo"
+        if any(palavra in valor for palavra in ("parceiro", "contador")):
+            return "parceiro"
+        if "admin" in valor:
+            return "admin"
+        return "default"
+
+    def _resposta_padrao(
+        self,
+        mensagem_usuario: str,
+        contexto_usuario: Dict[str, Any],
+        user_type: UserType,
+    ) -> str:
+        """Resposta de fallback quando a IA não está configurada."""
+        return (
+            "Olá! Estou operando em modo assistente básico.\n\n"
+            f"Pergunta recebida: {mensagem_usuario}\n"
+            f"Perfil detectado: {user_type}\n"
+            f"Contexto fornecido: {contexto_usuario}\n\n"
+            "Base de conhecimento do INSS/SAL:\n"
+            f"{self.conhecimento_sal}\n\n"
+            "Para habilitar respostas com IA completa, configure sua chave OpenAI em apps/backend/.env."
+        )

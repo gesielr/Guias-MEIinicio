@@ -4,10 +4,12 @@ import { supabase } from '../../supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { decryptData } from '../../utils/encryption';
 import logo from '../../assets/logo.png';
+import { getCertificateStatus } from '../../services/certificateService';
 
 const DashboardUser = () => {
   const [profile, setProfile] = useState(null);
   const [payments, setPayments] = useState([]);
+  const [certificateSummary, setCertificateSummary] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const navigate = useNavigate();
@@ -47,6 +49,9 @@ const DashboardUser = () => {
       if (paymentsError) throw paymentsError;
       setPayments(paymentsData);
 
+      const certificadoAtual = await getCertificateStatus(authUser.id).catch(() => null);
+      setCertificateSummary(certificadoAtual?.enrollment ?? null);
+
       setLoading(false);
     } catch (err) {
       setError('Erro ao carregar dados: ' + err.message);
@@ -76,6 +81,7 @@ const DashboardUser = () => {
 
   const handleEmitNFS = () => navigate('/emitir-nota');
   const handleEmitGPS = () => navigate('/emitir-gps');
+  const handleCertificado = () => navigate('/certificado');
 
   if (loading) {
     return <div style={styles.centered}><div style={styles.spinner}></div></div>;
@@ -121,6 +127,9 @@ const DashboardUser = () => {
                 <button onClick={handleEmitGPS} style={styles.actionButton} disabled={!profile.onboarding_completed}>
                     Emitir Guia de INSS (GPS)
                 </button>
+                <button onClick={handleCertificado} style={styles.actionButtonSecondary}>
+                    Acompanhar Certificado Digital
+                </button>
             </div>
             <div style={styles.card}>
                 <h3>Status do Cadastro</h3>
@@ -128,7 +137,12 @@ const DashboardUser = () => {
                     <p><strong>Contrato aceito:</strong> {profile.contract_accepted ? '✅ Sim' : '❌ Não'}</p>
                     <p><strong>Onboarding:</strong> {profile.onboarding_completed ? '✅ Completo' : '⏳ Pendente'}</p>
                     {profile.user_type === 'mei' && (
-                        <p><strong>Certificado Digital:</strong> {profile.digital_certificate_status || 'Pendente'}</p>
+                        <p>
+                            <strong>Certificado Digital:</strong> {certificateSummary ? certificateSummary.status : 'Pendente'}
+                            {certificateSummary?.valid_until && (
+                                <span> — vence em {new Date(certificateSummary.valid_until).toLocaleDateString('pt-BR')}</span>
+                            )}
+                        </p>
                     )}
                 </div>
             </div>

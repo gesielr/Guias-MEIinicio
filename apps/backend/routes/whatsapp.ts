@@ -1,53 +1,100 @@
 import type { FastifyInstance, FastifyRequest } from "fastify";
 import { z } from "zod";
+import { getCertWhatsappService } from "../src/services/whatsapp/cert-whatsapp.service";
 
-const messageSchema = z.object({
+const outboundSchema = z.object({
   to: z.string().min(8),
   message: z.string().min(1),
-  cobrancaId: z.string().optional(), // ID da cobrança relacionada
-  tipo: z.enum(['info', 'cobranca', 'notificacao']).optional(),
+  cobrancaId: z.string().optional(),
+  tipo: z.enum(["info", "cobranca", "notificacao"]).optional()
 });
 
-type MessageBody = z.infer<typeof messageSchema>;
+type OutboundPayload = z.infer<typeof outboundSchema>;
+
+function extractWhatsappNumber(body: any): string | null {
+  const from = body?.From ?? body?.from ?? body?.telefone;
+  if (typeof from === "string" && from.length > 0) {
+    return from;
+  }
+  return null;
+}
+
+function extractMessage(body: any): string {
+  return (body?.Body ?? body?.body ?? body?.mensagem ?? "").toString().trim();
+}
 
 export async function registerWhatsappRoutes(app: FastifyInstance) {
-  // Endpoint para enviar mensagens do WhatsApp
-  app.post("/whatsapp", async (request: FastifyRequest<{ Body: MessageBody }>) => {
-    const payload = messageSchema.parse(request.body);
-    request.log.info({ payload }, "WhatsApp message dispatched");
-    
-    // Se houver cobrancaId, registrar histórico
+  const whatsappService = getCertWhatsappService();
+
+  app.post("/whatsapp", async (request: FastifyRequest<{ Body: OutboundPayload }>) => {
+    const payload = outboundSchema.parse(request.body);
+    request.log.info({ payload }, "Enviando mensagem WhatsApp manual");
+
+    await whatsappService.enviarMensagemDireta(payload.to, payload.message);
+
     if (payload.cobrancaId) {
       try {
-        // Importar serviço de cobrança dinamicamente
-        const { getCobrancaService } = await import('../src/services/sicoob/cobranca-db.service');
+        const { getCobrancaService } = await import("../src/services/sicoob/cobranca-db.service");
         const cobrancaService = getCobrancaService();
-        
         await cobrancaService.adicionarHistorico(payload.cobrancaId, {
-          tipo: 'whatsapp_enviado',
+          tipo: "whatsapp_enviado",
           dados: {
             destinatario: payload.to,
             mensagem: payload.message,
-            tipo: payload.tipo || 'info',
-          },
+            tipo: payload.tipo || "info"
+          }
         });
-        
-        request.log.info({ cobrancaId: payload.cobrancaId }, "Histórico de WhatsApp registrado");
       } catch (error) {
         request.log.error({ error }, "Erro ao registrar histórico de WhatsApp");
       }
     }
-    
+
     return { ok: true };
   });
 
-  // Endpoint para webhook do WhatsApp (receber mensagens)
   app.post("/whatsapp/webhook", async (request: FastifyRequest) => {
-    request.log.info({ body: request.body }, "WhatsApp webhook received");
-    
-    // TODO: Processar mensagens recebidas e integrá-las com a IA
-    // Pode consultar cobranças, gerar links de pagamento, etc.
-    
+    const from = extractWhatsappNumber(request.body);
+    const message = extractMessage(request.body);
+    request.log.info({ from, message }, "Webhook WhatsApp recebido");
+
+    if (!from || !message) {
+      return { ok: false, reason: "payload inválido" };
+    }
+
+    const normalized = message.toLowerCase();
+    let resposta: string;
+
+    if (normalized.includes("certificado") && normalized.includes("status")) {
+      resposta = [
+        "🧾 *Status do Certificado Digital*",
+        "1. Gere o pagamento PIX de R$150 no painel ou peça o link por aqui.",
+        "2. Após o pagamento enviaremos seu agendamento com a Certisign.",
+        "3. Quando o certificado estiver ativo você receberá uma notificação automática.",
+        "Deseja que eu gere o QR Code novamente?"
+      ].join("\n\n");
+    } else if (normalized.includes("pagar") || normalized.includes("pix")) {
+      resposta = [
+        "🔗 *Pagamento do Certificado*",
+        "Enviei um novo QR Code PIX de R$150 para você completar o processo.",
+        "Depois do pagamento acompanhe por aqui. Qualquer dúvida é só responder."
+      ].join("\n\n");
+    } else if (normalized.includes("ajuda") || normalized.includes("suporte")) {
+      resposta = [
+        "👋 *Equipe GuiasMEI*",
+        "Estou aqui para ajudar com certificado, NFSe e INSS.",
+        "Para falar com um especialista humano basta responder \"humano\" e encaminharemos o atendimento."
+      ].join("\n\n");
+    } else {
+      resposta = [
+        "🙋 *Fluxo Certificado GuiasMEI*",
+        "1. Gere o pagamento PIX de R$150.",
+        "2. Aguarde o contato da Certisign para validar seus documentos.",
+        "3. Assim que estiver ativo liberamos a emissão de NFS-e.",
+        "Precisa refazer alguma etapa? É só me contar."
+      ].join("\n\n");
+    }
+
+    await whatsappService.enviarMensagemDireta(from, resposta);
     return { ok: true };
   });
 }

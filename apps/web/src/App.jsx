@@ -13,6 +13,7 @@ import EmitirNotaPage from "./features/nfse/EmitirNotaPage";
 import EmitirGpsPage from "./features/gps/EmitirGpsPage";
 import PaymentPage from "./features/pagamentos/PaymentPage";
 import PoliticaPrivacidade from "./features/legal/PoliticaPrivacidade";
+import CertificadoFlowPage from "./features/certificado/CertificadoFlowPage";
 
 // Importar páginas NFSe administrativas
 import CertificadosAdminPage from "./features/admin/nfse/CertificadosAdminPage";
@@ -35,6 +36,7 @@ export default function App() {
       <Route path="/emitir-gps" element={<EmitirGpsPage />} />
       <Route path="/pagamentos" element={<PaymentPage />} />
       <Route path="/politica-privacidade" element={<PoliticaPrivacidade />} />
+      <Route path="/certificado" element={<CertificadoFlowPage />} />
       <Route path="/dashboard" element={<DashboardUser />} />
       <Route path="/dashboard/usuario" element={<DashboardUser />} />
       <Route path="/dashboard/parceiro" element={<DashboardPartner />} />

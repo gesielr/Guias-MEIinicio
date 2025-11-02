@@ -66,11 +66,22 @@ Implementamos a base de dados e especificação completa para o fluxo de certifi
 - ✅ Schema Supabase e migrations dedicadas ao certificado (`supabase/migrations/20251101090000_create_cert_icp_tables.sql`)
 - ✅ Endpoints Fastify para consulta de datas, enrollment, assinatura e webhooks (modo mock da Certisign)
 - ✅ Serviço de pagamento PIX integrado ao Sicoob e reconciliado via webhook (`payment_cert_digital`)
-- ✅ Serviço de notificação por email estruturado (envio ainda em modo mock, pronto para SendGrid/Resend)
+- ✅ Notificações por email via SendGrid (fallback em log quando variáveis ausentes)
+- ✅ Automações WhatsApp com Twilio (confirmação de pagamento, certificado ativo, lembretes)
+- ✅ Scheduler de monitoramento cobre expiração de pagamentos, certificados e retries Sicoob
+- ⚠️ Integração real com a API Certisign pendente (CertificateService ainda em modo mock)
+- ⚠️ Fluxos completos de IA e testes E2E em evolução (frontend/WhatsApp)
+
+
+- ✅ Schema Supabase e migrations dedicadas ao certificado (`supabase/migrations/20251101090000_create_cert_icp_tables.sql`)
+- ✅ Endpoints Fastify para consulta de datas, enrollment, assinatura e webhooks (modo mock da Certisign)
+- ✅ Serviço de pagamento PIX integrado ao Sicoob e reconciliado via webhook (`payment_cert_digital`)
+- ✅ Notificações por email via SendGrid (fallback em log quando variáveis ausentes)
 - ⚠️ Integração real com a API Certisign pendente (CertificateService opera em modo mock)
-- ⚠️ Notificações WhatsApp para aprovação e confirmação a serem implementadas
-- ⚠️ NFSe ainda usa assinatura local; migração para assinatura remota planejada
-- ⚠️ Jobs de expiração, testes E2E e dashboards administrativos em backlog
+- ⚠️ Fluxos de IA e testes E2E completos em andamento (frontend/WhatsApp)
+- ✅ Automações WhatsApp com Twilio: confirmação de pagamento, certificado ativo e lembretes
+- ⚠️ Integração real com a API Certisign pendente (CertificateService ainda em modo mock)
+- ✅ Scheduler de monitoramento cobre expiração de pagamentos, certificados e retries Sicoob
 
 > Consulte os documentos acima para o plano completo, lacunas identificadas e roadmap por sprint.
 
@@ -566,7 +577,7 @@ Integração com o ecossistema Sicoob para gerenciamento de cobranças via PIX e
 - 💰 **Cobranças PIX** (imediatas e com vencimento) (✅ Funcionando 31/10/2025)
 - 📄 **Boletos Bancários** (geração, consulta, cancelamento, PDF) (❌ Bloqueado - Sandbox Incompatível 31/10/2025)
 - 🔔 **Webhooks** com validação HMAC e persistência automática (✅ Implementado)
-- 📱 **Notificações WhatsApp** automatizadas para eventos de pagamento (✅ Implementado)
+- ✅ Automações WhatsApp com Twilio: confirmação de pagamento, certificado ativo e lembretes
 supabase db diff
 ```
 
@@ -578,7 +589,7 @@ Integração completa com o ecossistema Sicoob para gerenciamento de cobranças 
 - 💰 **Cobranças PIX** (imediatas e com vencimento)
 - 📄 **Boletos Bancários** (geração, consulta, cancelamento, PDF)
 - 🔔 **Webhooks** com validação HMAC e persistência automática
-- 📱 **Notificações WhatsApp** automatizadas para eventos de pagamento
+- ✅ Automações WhatsApp com Twilio: confirmação de pagamento, certificado ativo e lembretes
 
 ### **Arquitetura**
 
@@ -1362,6 +1373,11 @@ NFSE_CERT_PFX_PASS=...
 ```
 
 ### Checklist Produção/Homologação
+- [ ] Configurar SENDGRID_API_KEY e EMAIL_FROM para disparo de emails em produção
+- [ ] Configurar credenciais Twilio (TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_WHATSAPP_NUMBER)
+- [ ] Executar `supabase db push` para aplicar migrations novas (cert_expiry_notifications)
+- [ ] Atualizar `.env` com CERTISIGN_EMAIL_CERTIFICADORA e chaves Sicoob/Webhooks revisadas
+- [ ] Rodar `npm install` em apps/backend e apps/web para incluir dependências (@sendgrid/mail, twilio, date-fns)
 - [x] Endpoints REST integrados e testados (94% validados)
 - [x] Certificado ICP-Brasil configurado e validado
 - [x] Testes automatizados rodando

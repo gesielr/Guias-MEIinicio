@@ -13,6 +13,8 @@ import {
   SignatureRequestPayload
 } from './types';
 import crypto from 'crypto';
+import { getCertNotificationService } from '../email/cert-notification.service';
+import { getCertWhatsappService } from '../whatsapp/cert-whatsapp.service';
 
 const { admin } = createSupabaseClients();
 
@@ -174,7 +176,12 @@ export class CertificateService {
     );
 
     console.log('[SUCCESS] Certificado ativado com sucesso');
-    // TODO: Notificar usuário via WhatsApp
+
+    const emailNotify = getCertNotificationService();
+    await emailNotify.notificarUsuarioCertificadoAtivo(enrollment.user_id);
+
+    const whatsappNotify = getCertWhatsappService();
+    await whatsappNotify.notificarCertificadoAtivo(enrollment.user_id);
   }
 
   /**

@@ -8,6 +8,7 @@ import { WebhookEvent, WebhookEventType, WebhookPayload } from './types';
 import { sicoobLogger } from '../../utils/sicoob-logger';
 import { getPaymentCertService } from '../certificate/payment-cert.service';
 import { getCertNotificationService } from '../email/cert-notification.service';
+import { getCertWhatsappService } from '../whatsapp/cert-whatsapp.service';
 import { createSupabaseClients } from '../../../services/supabase';
 
 const { admin } = createSupabaseClients();
@@ -272,8 +273,10 @@ export class SicoobWebhookService {
             await paymentService.marcarPagamentoComoPago(event.dados.txid);
 
             const notify = getCertNotificationService();
+            const whatsapp = getCertWhatsappService();
             await notify.notificarCertificadora(pagamento.user_id);
             await notify.notificarUsuarioPagamentoConfirmado(pagamento.user_id);
+            await whatsapp.notificarPagamentoConfirmado(pagamento.user_id);
 
             sicoobLogger.info('Fluxo Certificado: pagamento confirmado e notificações enviadas', {
               txid: event.dados.txid,
