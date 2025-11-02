@@ -1,5 +1,5 @@
 -- Certificado Digital ICP-Brasil: Tabelas base (providers, enrollments, sign requests, auditoria, pagamentos)
--- Observação de compliance: NUNCA armazenar PFX/chave privada/senha. Somente metadados do certificado e logs.
+-- ObservaÃ§Ã£o de compliance: NUNCA armazenar PFX/chave privada/senha. Somente metadados do certificado e logs.
 
 -- Tabela de certificadoras/provedores (ex.: Certisign)
 CREATE TABLE IF NOT EXISTS public.cert_providers (
@@ -16,13 +16,13 @@ CREATE TABLE IF NOT EXISTS public.cert_providers (
 
 CREATE INDEX IF NOT EXISTS idx_cert_providers_ativo ON public.cert_providers(ativo);
 
--- Tabela de vínculos de certificado com usuário (sem material sigiloso)
+-- Tabela de vÃ­nculos de certificado com usuÃ¡rio (sem material sigiloso)
 CREATE TABLE IF NOT EXISTS public.cert_enrollments (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
     provider_id UUID NOT NULL REFERENCES public.cert_providers(id),
 
-    -- Metadados do certificado (NÃO armazenar PFX/chave privada)
+    -- Metadados do certificado (NÃƒO armazenar PFX/chave privada)
     external_cert_id VARCHAR(255) NOT NULL,
     subject TEXT NOT NULL,              -- Ex.: CN=NOME:CPF/CNPJ
     serial_number VARCHAR(255) NOT NULL,
@@ -50,7 +50,7 @@ CREATE INDEX IF NOT EXISTS idx_cert_enrollments_user ON public.cert_enrollments(
 CREATE INDEX IF NOT EXISTS idx_cert_enrollments_status ON public.cert_enrollments(status);
 CREATE INDEX IF NOT EXISTS idx_cert_enrollments_validity ON public.cert_enrollments(valid_until) WHERE status = 'ACTIVE';
 
--- Tabela de solicitações de assinatura remota
+-- Tabela de solicitaÃ§Ãµes de assinatura remota
 CREATE TABLE IF NOT EXISTS public.sign_requests (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     enrollment_id UUID NOT NULL REFERENCES public.cert_enrollments(id) ON DELETE CASCADE,
@@ -75,7 +75,7 @@ CREATE TABLE IF NOT EXISTS public.sign_requests (
     -- Status
     status VARCHAR(50) NOT NULL DEFAULT 'PENDING' CHECK (status IN ('PENDING','APPROVED','REJECTED','EXPIRED')),
 
-    -- Consentimento do usuário
+    -- Consentimento do usuÃ¡rio
     user_consent_at TIMESTAMPTZ,
     user_ip VARCHAR(45),
     user_agent TEXT,
@@ -120,7 +120,7 @@ CREATE TABLE IF NOT EXISTS public.payment_cert_digital (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
 
-    -- Relacionamento com cobrança Sicoob (opcional, facilita JOIN)
+    -- Relacionamento com cobranÃ§a Sicoob (opcional, facilita JOIN)
     sicoob_cobranca_id UUID REFERENCES public.sicoob_cobrancas(id) ON DELETE SET NULL,
 
     -- PIX
@@ -143,22 +143,14 @@ CREATE INDEX IF NOT EXISTS idx_payment_cert_user ON public.payment_cert_digital(
 CREATE INDEX IF NOT EXISTS idx_payment_cert_status ON public.payment_cert_digital(status);
 CREATE INDEX IF NOT EXISTS idx_payment_cert_enrollment ON public.payment_cert_digital(enrollment_id);
 
--- Triggers para updated_at (reutiliza função pública já existente se criada anteriormente)
-DO $$
+-- Triggers para updated_at (função idempotente)
+CREATE OR REPLACE FUNCTION public.handle_updated_at()
+RETURNS TRIGGER AS $$
 BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_proc WHERE proname = 'handle_updated_at' AND pronamespace = 'public'::regnamespace
-  ) THEN
-    CREATE OR REPLACE FUNCTION public.handle_updated_at()
-    RETURNS TRIGGER AS $$
-    BEGIN
-      NEW.updated_at = NOW();
-      RETURN NEW;
-    END;
-    $$ LANGUAGE plpgsql;
-  END IF;
-END$$;
-
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
 CREATE TRIGGER trg_updated_at_cert_providers
   BEFORE UPDATE ON public.cert_providers
   FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
@@ -182,36 +174,40 @@ ALTER TABLE public.sign_requests ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.sign_audit_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.payment_cert_digital ENABLE ROW LEVEL SECURITY;
 
--- Políticas: cert_providers (somente service role/servidor - nenhuma policy de SELECT para usuários comuns)
--- Observação: o service key do Supabase ignora RLS, portanto não é necessário expor políticas permissivas aqui.
+-- PolÃ­ticas: cert_providers (somente service role/servidor - nenhuma policy de SELECT para usuÃ¡rios comuns)
+-- ObservaÃ§Ã£o: o service key do Supabase ignora RLS, portanto nÃ£o Ã© necessÃ¡rio expor polÃ­ticas permissivas aqui.
 
--- Políticas: cert_enrollments
-CREATE POLICY "Usuário pode ver seus próprios enrollments"
+-- PolÃ­ticas: cert_enrollments
+CREATE POLICY "UsuÃ¡rio pode ver seus prÃ³prios enrollments"
   ON public.cert_enrollments
   FOR SELECT
   USING (auth.uid() = user_id);
 
--- Políticas: sign_requests
-CREATE POLICY "Usuário pode ver suas próprias solicitações de assinatura"
+-- PolÃ­ticas: sign_requests
+CREATE POLICY "UsuÃ¡rio pode ver suas prÃ³prias solicitaÃ§Ãµes de assinatura"
   ON public.sign_requests
   FOR SELECT
   USING (auth.uid() = user_id);
 
--- Políticas: sign_audit_logs
-CREATE POLICY "Usuário pode ver logs próprios"
+-- PolÃ­ticas: sign_audit_logs
+CREATE POLICY "UsuÃ¡rio pode ver logs prÃ³prios"
   ON public.sign_audit_logs
   FOR SELECT
   USING (auth.uid() = user_id);
 
--- Políticas: payment_cert_digital
-CREATE POLICY "Usuário pode ver seus próprios pagamentos de certificado"
+-- PolÃ­ticas: payment_cert_digital
+CREATE POLICY "UsuÃ¡rio pode ver seus prÃ³prios pagamentos de certificado"
   ON public.payment_cert_digital
   FOR SELECT
   USING (auth.uid() = user_id);
 
--- Comentários (documentação)
-COMMENT ON TABLE public.cert_providers IS 'Provedores de certificado digital (ex.: Certisign). Armazena apenas metadados e segredos de integração.';
-COMMENT ON TABLE public.cert_enrollments IS 'Vínculo de certificado digital com usuário. Somente metadados; nunca armazena material sensível.';
-COMMENT ON TABLE public.sign_requests IS 'Solicitações de assinatura remota (hashes, status, valores de assinatura e expirabilidade).';
-COMMENT ON TABLE public.sign_audit_logs IS 'Logs de auditoria para consentimento, aprovação e eventos relacionados à assinatura (LGPD).';
-COMMENT ON TABLE public.payment_cert_digital IS 'Pagamentos para emissão de certificado digital (PIX Sicoob).';
+-- ComentÃ¡rios (documentaÃ§Ã£o)
+COMMENT ON TABLE public.cert_providers IS 'Provedores de certificado digital (ex.: Certisign). Armazena apenas metadados e segredos de integraÃ§Ã£o.';
+COMMENT ON TABLE public.cert_enrollments IS 'VÃ­nculo de certificado digital com usuÃ¡rio. Somente metadados; nunca armazena material sensÃ­vel.';
+COMMENT ON TABLE public.sign_requests IS 'SolicitaÃ§Ãµes de assinatura remota (hashes, status, valores de assinatura e expirabilidade).';
+COMMENT ON TABLE public.sign_audit_logs IS 'Logs de auditoria para consentimento, aprovaÃ§Ã£o e eventos relacionados Ã  assinatura (LGPD).';
+COMMENT ON TABLE public.payment_cert_digital IS 'Pagamentos para emissÃ£o de certificado digital (PIX Sicoob).';
+
+
+
+
