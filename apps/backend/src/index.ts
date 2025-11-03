@@ -3,6 +3,7 @@ import Fastify from "fastify";
 import fastifyCors from "@fastify/cors";
 import fastifyExpress from "@fastify/express";
 import fastifySensible from "@fastify/sensible";
+import { existsSync } from "node:fs";
 import { env } from "./env";
 import { registerAuthRoutes } from "../routes/auth";
 import { registerDashboardRoutes } from "../routes/dashboard";
@@ -19,16 +20,36 @@ import { registerSicoobRoutes } from "./routes/sicoob.routes";
 import { certisignRoutes } from "./routes/certisign.routes";
 
 function hasSicoobConfiguration(): boolean {
-  const hasFileCert = env.SICOOB_CERT_PATH && env.SICOOB_KEY_PATH;
-  const hasPfx = env.SICOOB_CERT_PFX_BASE64 && env.SICOOB_CERT_PFX_PASS;
   const baseUrl = env.SICOOB_API_BASE_URL || (env as any).SICOOB_PIX_BASE_URL;
+  if (!baseUrl || !env.SICOOB_AUTH_URL || !env.SICOOB_CLIENT_ID) {
+    return false;
+  }
 
-  return Boolean(
-    baseUrl &&
-      env.SICOOB_AUTH_URL &&
-      env.SICOOB_CLIENT_ID &&
-      (hasFileCert || hasPfx)
-  );
+  const hasPfx = Boolean(env.SICOOB_CERT_PFX_BASE64 && env.SICOOB_CERT_PFX_PASS);
+  if (hasPfx) {
+    return true;
+  }
+
+  if (!env.SICOOB_CERT_PATH && !env.SICOOB_KEY_PATH) {
+    return false;
+  }
+
+  if (!env.SICOOB_CERT_PATH || !env.SICOOB_KEY_PATH) {
+    console.warn("[SICOOB] Caminhos de certificado incompletos. Defina SICOOB_CERT_PATH e SICOOB_KEY_PATH.");
+    return false;
+  }
+
+  if (!existsSync(env.SICOOB_CERT_PATH)) {
+    console.warn("[SICOOB] Certificado ausente:", env.SICOOB_CERT_PATH);
+    return false;
+  }
+
+  if (!existsSync(env.SICOOB_KEY_PATH)) {
+    console.warn("[SICOOB] Chave privada ausente:", env.SICOOB_KEY_PATH);
+    return false;
+  }
+
+  return true;
 }
 
 async function buildServer() {

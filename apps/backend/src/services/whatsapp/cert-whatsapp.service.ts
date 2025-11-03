@@ -114,9 +114,7 @@ export class CertWhatsappService {
       `Olá, ${profile?.nome ?? "empreendedor(a)"}!`,
       "O QR Code do seu certificado digital expirou.",
       "Você pode gerar um novo link no painel GuiasMEI ou chamar nossa equipe por aqui."
-    ].join("
-
-");
+    ].join("\n\n");
 
     await this.sendMessage(numero, mensagem);
   }
@@ -142,9 +140,7 @@ export class CertWhatsappService {
       `Seu certificado digital expira em ${diasRestantes} dia(s).`,
       "Renove com antecedência para continuar emitindo NFS-e sem interrupções.",
       "Qualquer dúvida é só responder esta mensagem."
-    ].join("
-
-");
+    ].join("\n\n");
 
     await this.sendMessage(numero, mensagem);
   }

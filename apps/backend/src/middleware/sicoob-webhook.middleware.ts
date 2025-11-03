@@ -3,8 +3,10 @@
  * Valida assinatura e timestamp dos webhooks
  */
 
-import { Request, Response, NextFunction } from 'express';
-import { sicoobLogger } from '../utils/sicoob-logger';
+import { Request, Response, NextFunction } from "express";
+import bodyParser from "body-parser";
+import { createHmac, timingSafeEqual } from "node:crypto";
+import { sicoobLogger } from "../utils/sicoob-logger";
 
 export interface SicoobWebhookRequest extends Request {
   sicoobPayload?: string;
@@ -62,15 +64,13 @@ export function sicoobWebhookMiddleware(webhookSecret: string) {
       }
 
       // Validar assinatura HMAC
-      const crypto = require('crypto');
-      const expectedSignature = crypto
-        .createHmac('sha256', webhookSecret)
+      const expectedSignature = createHmac("sha256", webhookSecret)
         .update(payload)
-        .digest('hex');
+        .digest("hex");
 
       let isValid = false;
       try {
-        isValid = crypto.timingSafeEqual(
+        isValid = timingSafeEqual(
           Buffer.from(signature),
           Buffer.from(expectedSignature)
         );
@@ -101,7 +101,6 @@ export function sicoobWebhookMiddleware(webhookSecret: string) {
  * Middleware para parsear JSON do webhook
  */
 export function sicoobWebhookBodyParser() {
-  const bodyParser = require('body-parser');
   return bodyParser.json({
     verify: (req: SicoobWebhookRequest, res: Response, buf: Buffer) => {
       req.rawBody = buf.toString('utf8');
